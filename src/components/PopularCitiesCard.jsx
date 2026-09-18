@@ -1,6 +1,5 @@
 import React from 'react';
 import WeatherIcon from './WeatherIcon';
-import { POPULAR_CITIES, EXPANDED_CITIES } from '../constants/cities';
 
 export default function PopularCitiesCard({
   citiesList,
@@ -11,7 +10,7 @@ export default function PopularCitiesCard({
   formatTemp,
   tempSymbol,
 }) {
-  const source = citiesList || EXPANDED_CITIES;
+  const source = citiesList || [];
   const displayCities = viewMoreCities ? source : source.slice(0, 5);
 
   return (

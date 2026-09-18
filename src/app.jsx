@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
 
-import { API_KEY, CITY_DATABASE, mapConditionToIconType } from './constants/cities';
+import { API_KEY, DEFAULT_POPULAR_CITIES, mapConditionToIconType } from './constants/cities';
 
 import NavigationRail from './components/NavigationRail';
 import Header from './components/Header';
@@ -26,7 +26,7 @@ export default function App() {
   const [activeForecastDayIndex, setActiveForecastDayIndex] = useState(3);
   const [hoveredHour, setHoveredHour] = useState(null);
   const [viewMoreCities, setViewMoreCities] = useState(false);
-  const [popularCitiesList, setPopularCitiesList] = useState(CITY_DATABASE);
+  const [popularCitiesList, setPopularCitiesList] = useState([]);
 
   // Search Suggestions & History State
   const [searchFocused, setSearchFocused] = useState(false);
@@ -163,15 +163,25 @@ export default function App() {
   }, [radarPlaying, radarSpeed]);
 
   // Fetch weather and air quality data for city from OpenWeatherMap API
-  const fetchCityWeather = async (cityName) => {
-    if (!cityName || !cityName.trim()) return;
+  const fetchCityWeather = async (cityName, lat = null, lon = null) => {
+    if (!cityName && (lat == null || lon == null)) return;
     setLoading(true);
 
     try {
-      // 1. Fetch live current weather
-      const res = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(cityName.trim())}&units=metric&appid=${API_KEY}`
-      );
+      // 1. Fetch live current weather by coordinates or city name
+      let queryUrl = (lat != null && lon != null)
+        ? `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
+        : `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(cityName.trim())}&units=metric&appid=${API_KEY}`;
+
+      let res = await fetch(queryUrl);
+
+      // Fallback: if query with comma or state failed, try just the city name part
+      if (!res.ok && cityName && cityName.includes(',')) {
+        const cleanName = cityName.split(',')[0].trim();
+        res = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(cleanName)}&units=metric&appid=${API_KEY}`
+        );
+      }
 
       if (res.ok) {
         const data = await res.json();
@@ -197,7 +207,6 @@ export default function App() {
             if (airData.list && airData.list.length > 0) {
               const air = airData.list[0];
               const pm25 = air.components.pm2_5 || 10;
-              // US EPA-aligned AQI calculation from PM2.5
               realAqi = Math.round(pm25 * 3.8);
               if (air.main.aqi === 1) aqiStatus = 'Good';
               else if (air.main.aqi === 2) aqiStatus = 'Fair';
@@ -273,10 +282,10 @@ export default function App() {
           setNotifications(liveAlerts);
         }
 
-        // 3. Fetch 5-day / 3-hour live forecast
+        // 3. Fetch 5-day / 3-hour live forecast directly by coordinates
         try {
           const forecastRes = await fetch(
-            `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(cityName.trim())}&units=metric&appid=${API_KEY}`
+            `https://api.openweathermap.org/data/2.5/forecast?lat=${data.coord.lat}&lon=${data.coord.lon}&units=metric&appid=${API_KEY}`
           );
           if (forecastRes.ok) {
             const fData = await forecastRes.json();
@@ -320,7 +329,7 @@ export default function App() {
               icon: d.icon,
             }));
 
-            if (parsedForecast.length >= 5) {
+            if (parsedForecast.length >= 4) {
               setForecastList(parsedForecast);
             }
           }
@@ -328,35 +337,7 @@ export default function App() {
           console.warn('Forecast API error, using calculated forecast', e);
         }
       } else {
-        const match = CITY_DATABASE.find(c => c.name.toLowerCase() === cityName.trim().toLowerCase());
-        if (match) {
-          setWeather({
-            city: match.name,
-            country: match.code,
-            temp: match.temp,
-            feelsLike: match.temp - 1,
-            condition: match.condition,
-            description: match.condition.toLowerCase(),
-            humidity: 75,
-            windSpeed: 6,
-            aqi: 65,
-            aqiStatus: 'Moderate',
-            uv: 3,
-            pressure: 1012,
-            visibility: 9,
-            dewPoint: match.temp - 3,
-            sunrise: '06:05 AM',
-            sunset: '06:42 PM',
-            lat: match.lat,
-            lon: match.lon,
-            timeString: 'Live',
-            isLiveApi: false,
-          });
-          setActiveCity(match.name);
-          triggerToast(`Loaded cached data for ${match.name}`);
-        } else {
-          triggerToast(`City "${cityName}" not found`);
-        }
+        triggerToast(`City "${cityName}" not found on OpenWeather`);
       }
     } catch (err) {
       console.warn('Weather fetch error:', err);
@@ -369,7 +350,7 @@ export default function App() {
   // Fetch live weather for popular cities from API
   const fetchPopularCitiesWeather = async () => {
     try {
-      const topCities = ['Delhi', 'Mumbai', 'Hyderabad', 'Bengaluru', 'Kolkata'];
+      const topCities = DEFAULT_POPULAR_CITIES;
       const results = await Promise.all(
         topCities.map(async (name) => {
           try {
@@ -380,9 +361,13 @@ export default function App() {
               const d = await res.json();
               return {
                 name: d.name,
+                country: d.sys.country,
+                code: d.sys.country,
                 temp: Math.round(d.main.temp),
                 condition: d.weather[0].main,
                 icon: mapConditionToIconType(d.weather[0].main),
+                lat: d.coord.lat,
+                lon: d.coord.lon,
               };
             }
           } catch (e) {}
@@ -391,14 +376,7 @@ export default function App() {
       );
       const valid = results.filter(Boolean);
       if (valid.length > 0) {
-        setPopularCitiesList(prev => {
-          const map = {};
-          valid.forEach(v => { map[v.name.toLowerCase()] = v; });
-          return prev.map(c => {
-            const match = map[c.name.toLowerCase()];
-            return match ? { ...c, temp: match.temp, condition: match.condition, icon: match.icon } : c;
-          });
-        });
+        setPopularCitiesList(valid);
       }
     } catch (e) {
       console.warn('Error fetching popular cities weather:', e);
@@ -472,8 +450,10 @@ export default function App() {
 
   const handleSelectSuggestion = (cityOrName) => {
     const cityName = typeof cityOrName === 'string' ? cityOrName : cityOrName.name;
+    const lat = typeof cityOrName === 'object' && cityOrName !== null ? cityOrName.lat : null;
+    const lon = typeof cityOrName === 'object' && cityOrName !== null ? cityOrName.lon : null;
     setActiveCity(cityName);
-    fetchCityWeather(cityName);
+    fetchCityWeather(cityName, lat, lon);
     addRecentSearch(cityName);
     setCityInput('');
     setApiSuggestions([]);
@@ -498,45 +478,8 @@ export default function App() {
     }
   };
 
-  // Combine live OpenWeather API suggestions + local curated database
-  const localMatches = cityInput.trim()
-    ? CITY_DATABASE.filter((c) => {
-        const q = cityInput.trim().toLowerCase();
-        return (
-          c.name.toLowerCase().includes(q) ||
-          (c.state && c.state.toLowerCase().includes(q)) ||
-          c.country.toLowerCase().includes(q) ||
-          c.code.toLowerCase() === q
-        );
-      })
-    : [];
-
-  // Deduplicate and combine API and local matches
-  const filteredSuggestions = (() => {
-    if (!cityInput.trim()) return [];
-    const seen = new Set();
-    const combined = [];
-
-    // Prioritize API results for global accuracy
-    apiSuggestions.forEach((item) => {
-      const key = `${item.name.toLowerCase()}-${item.country.toLowerCase()}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        combined.push(item);
-      }
-    });
-
-    // Add local matches that weren't already found
-    localMatches.forEach((item) => {
-      const key = `${item.name.toLowerCase()}-${item.country.toLowerCase()}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        combined.push(item);
-      }
-    });
-
-    return combined.slice(0, 8);
-  })();
+  // 100% Live OpenWeather Direct Geocoding API suggestions
+  const filteredSuggestions = apiSuggestions;
 
   const handleSearchKeyDown = (e) => {
     if (!searchFocused) return;
@@ -574,9 +517,12 @@ export default function App() {
   }, []);
 
   const handleSelectCity = (city) => {
-    setActiveCity(city.name);
-    fetchCityWeather(city.name);
-    addRecentSearch(city.name);
+    const cityName = typeof city === 'string' ? city : city.name;
+    const lat = typeof city === 'object' && city !== null ? city.lat : null;
+    const lon = typeof city === 'object' && city !== null ? city.lon : null;
+    setActiveCity(cityName);
+    fetchCityWeather(cityName, lat, lon);
+    addRecentSearch(cityName);
   };
 
   // GPS Locate Me
@@ -840,6 +786,7 @@ export default function App() {
           {activeNav === 'map' && (
             <FullWeatherMap
               weather={weather}
+              popularCities={popularCitiesList}
               mapLayer={mapLayer}
               setMapLayer={setMapLayer}
               formatTemp={formatTemp}

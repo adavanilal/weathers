@@ -6,10 +6,11 @@ import {
   ZoomOut,
   Crosshair,
 } from 'lucide-react';
-import { CITY_DATABASE, getTileUrl } from '../constants/cities';
+import { getTileUrl } from '../constants/cities';
 
 export default function FullWeatherMap({
   weather,
+  popularCities = [],
   mapLayer,
   setMapLayer,
   formatTemp,
@@ -52,8 +53,8 @@ export default function FullWeatherMap({
     ).openPopup();
 
     // Key City Markers
-    CITY_DATABASE.slice(0, 15).forEach((c) => {
-      if (c.name.toLowerCase() !== weather.city.toLowerCase()) {
+    (popularCities || []).slice(0, 15).forEach((c) => {
+      if (c.lat && c.lon && c.name && c.name.toLowerCase() !== (weather.city || '').toLowerCase()) {
         const cityMarker = L.circleMarker([c.lat, c.lon], {
           radius: 7,
           fillColor: '#38bdf8',

@@ -114,6 +114,10 @@ export default function Header({
                         <button
                           key={`${city.name}-${city.country}-${city.state || idx}`}
                           type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            handleSelectSuggestion(city);
+                          }}
                           onClick={() => handleSelectSuggestion(city)}
                           onMouseEnter={() => setSearchSuggestionIndex(idx)}
                           className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all ${
@@ -198,6 +202,10 @@ export default function Header({
                         >
                           <button
                             type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              handleSelectSuggestion(term);
+                            }}
                             onClick={() => handleSelectSuggestion(term)}
                             className="hover:text-sky-300 text-left"
                           >
@@ -205,6 +213,11 @@ export default function Header({
                           </button>
                           <button
                             type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              removeRecentSearch(term);
+                            }}
                             onClick={(e) => {
                               e.stopPropagation();
                               removeRecentSearch(term);
@@ -231,6 +244,10 @@ export default function Header({
                       <button
                         key={c}
                         type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleSelectSuggestion(c);
+                        }}
                         onClick={() => handleSelectSuggestion(c)}
                         className="px-2 py-1.5 rounded-lg bg-white/5 hover:bg-blue-600/30 border border-white/5 hover:border-blue-400/30 text-left text-xs font-medium text-slate-200 hover:text-white transition flex items-center justify-between"
                       >
