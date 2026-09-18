@@ -29,9 +29,9 @@ export default function CurrentWeatherCard({
             <h2 className="text-base font-semibold text-white tracking-wide">
               Current Weather
             </h2>
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              Live OpenWeather API
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              Live API
             </span>
           </div>
           <span className="text-xs text-slate-400 font-medium mt-0.5 block">
