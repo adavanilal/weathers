@@ -35,32 +35,61 @@ import {
   Sunrise,
   Sunset,
   ShieldAlert,
-  Sliders
+  Sliders,
+  Clock,
+  History,
+  Sparkles,
+  TrendingUp
 } from 'lucide-react';
 import L from 'leaflet';
 
 const API_KEY = "b8b969778b291dfb7a094d1c8ad2bd93";
 
-// Popular cities reference list
-const POPULAR_CITIES = [
-  { name: 'Delhi', condition: 'Partly Cloudy', temp: 28, minTemp: 22, rain: 20, icon: 'cloud-sun', lat: 28.6139, lon: 77.2090 },
-  { name: 'Mumbai', condition: 'Drizzle Rain', temp: 27, minTemp: 24, rain: 65, icon: 'drizzle', lat: 19.0760, lon: 72.8777 },
-  { name: 'Hyderabad', condition: 'Heavy Rain', temp: 24, minTemp: 21, rain: 88, icon: 'heavy-rain', lat: 17.3850, lon: 78.4867 },
-  { name: 'Bangalore', condition: 'Light Thunders', temp: 23, minTemp: 19, rain: 72, icon: 'thunder', lat: 12.9716, lon: 77.5946 },
-  { name: 'Kolkata', condition: 'Mostly Sunny', temp: 31, minTemp: 26, rain: 15, icon: 'sun', lat: 22.5726, lon: 88.3639 },
+// Comprehensive City Database for instant suggestions
+const CITY_DATABASE = [
+  // India Metros & Cities
+  { name: 'Hyderabad', state: 'Telangana', country: 'India', code: 'IN', condition: 'Heavy Rain', temp: 24, icon: 'heavy-rain', lat: 17.3850, lon: 78.4867 },
+  { name: 'Delhi', state: 'Delhi', country: 'India', code: 'IN', condition: 'Partly Cloudy', temp: 28, icon: 'cloud-sun', lat: 28.6139, lon: 77.2090 },
+  { name: 'Mumbai', state: 'Maharashtra', country: 'India', code: 'IN', condition: 'Drizzle Rain', temp: 27, icon: 'drizzle', lat: 19.0760, lon: 72.8777 },
+  { name: 'Bengaluru', state: 'Karnataka', country: 'India', code: 'IN', condition: 'Light Thunders', temp: 23, icon: 'thunder', lat: 12.9716, lon: 77.5946 },
+  { name: 'Bangalore', state: 'Karnataka', country: 'India', code: 'IN', condition: 'Light Thunders', temp: 23, icon: 'thunder', lat: 12.9716, lon: 77.5946 },
+  { name: 'Kolkata', state: 'West Bengal', country: 'India', code: 'IN', condition: 'Mostly Sunny', temp: 31, icon: 'sun', lat: 22.5726, lon: 88.3639 },
+  { name: 'Chennai', state: 'Tamil Nadu', country: 'India', code: 'IN', condition: 'Humid & Sunny', temp: 32, icon: 'sun', lat: 13.0827, lon: 80.2707 },
+  { name: 'Pune', state: 'Maharashtra', country: 'India', code: 'IN', condition: 'Cloudy', temp: 26, icon: 'cloud', lat: 18.5204, lon: 73.8567 },
+  { name: 'Ahmedabad', state: 'Gujarat', country: 'India', code: 'IN', condition: 'Hot & Clear', temp: 34, icon: 'sun', lat: 23.0225, lon: 72.5714 },
+  { name: 'Jaipur', state: 'Rajasthan', country: 'India', code: 'IN', condition: 'Sunny', temp: 33, icon: 'sun', lat: 26.9124, lon: 75.7873 },
+  { name: 'Lucknow', state: 'Uttar Pradesh', country: 'India', code: 'IN', condition: 'Hazy Sun', temp: 30, icon: 'cloud-sun', lat: 26.8467, lon: 80.9462 },
+  { name: 'Chandigarh', state: 'Punjab', country: 'India', code: 'IN', condition: 'Clear', temp: 29, icon: 'sun', lat: 30.7333, lon: 76.7794 },
+  { name: 'Bhopal', state: 'Madhya Pradesh', country: 'India', code: 'IN', condition: 'Partly Cloudy', temp: 28, icon: 'cloud-sun', lat: 23.2599, lon: 77.4126 },
+  { name: 'Indore', state: 'Madhya Pradesh', country: 'India', code: 'IN', condition: 'Clear', temp: 27, icon: 'sun', lat: 22.7196, lon: 75.8577 },
+  { name: 'Kochi', state: 'Kerala', country: 'India', code: 'IN', condition: 'Rain Showers', temp: 28, icon: 'rain', lat: 9.9312, lon: 76.2673 },
+  { name: 'Goa', state: 'Goa', country: 'India', code: 'IN', condition: 'Tropical Rain', temp: 28, icon: 'heavy-rain', lat: 15.2993, lon: 74.1240 },
+  { name: 'Visakhapatnam', state: 'Andhra Pradesh', country: 'India', code: 'IN', condition: 'Coastal Breeze', temp: 29, icon: 'cloud-sun', lat: 17.6868, lon: 83.2185 },
+  { name: 'Patna', state: 'Bihar', country: 'India', code: 'IN', condition: 'Warm', temp: 31, icon: 'sun', lat: 25.5941, lon: 85.1376 },
+  { name: 'Nagpur', state: 'Maharashtra', country: 'India', code: 'IN', condition: 'Clear Skies', temp: 30, icon: 'sun', lat: 21.1458, lon: 79.0882 },
+  { name: 'Bhubaneswar', state: 'Odisha', country: 'India', code: 'IN', condition: 'Thunderstorm', temp: 29, icon: 'thunder', lat: 20.2961, lon: 85.8245 },
+  { name: 'Shimla', state: 'Himachal Pradesh', country: 'India', code: 'IN', condition: 'Chilly & Misty', temp: 16, icon: 'cloud', lat: 31.1048, lon: 77.1734 },
+  { name: 'Srinagar', state: 'Jammu and Kashmir', country: 'India', code: 'IN', condition: 'Cool Breeze', temp: 18, icon: 'cloud-sun', lat: 34.0837, lon: 74.7973 },
+
+  // International Cities
+  { name: 'London', state: 'England', country: 'United Kingdom', code: 'GB', condition: 'Drizzle', temp: 18, icon: 'drizzle', lat: 51.5074, lon: -0.1278 },
+  { name: 'New York', state: 'NY', country: 'United States', code: 'US', condition: 'Partly Cloudy', temp: 22, icon: 'cloud-sun', lat: 40.7128, lon: -74.0060 },
+  { name: 'Tokyo', state: 'Kanto', country: 'Japan', code: 'JP', condition: 'Clear', temp: 26, icon: 'sun', lat: 35.6762, lon: 139.6503 },
+  { name: 'Dubai', state: 'Dubai', country: 'United Arab Emirates', code: 'AE', condition: 'Sunny & Hot', temp: 38, icon: 'sun', lat: 25.2048, lon: 55.2708 },
+  { name: 'Singapore', state: 'Central', country: 'Singapore', code: 'SG', condition: 'Thunderstorm', temp: 29, icon: 'thunder', lat: 1.3521, lon: 103.8198 },
+  { name: 'Paris', state: 'Île-de-France', country: 'France', code: 'FR', condition: 'Cloudy', temp: 20, icon: 'cloud', lat: 48.8566, lon: 2.3522 },
+  { name: 'Sydney', state: 'NSW', country: 'Australia', code: 'AU', condition: 'Sunny', temp: 21, icon: 'sun', lat: -33.8688, lon: 151.2093 },
+  { name: 'Toronto', state: 'Ontario', country: 'Canada', code: 'CA', condition: 'Mild', temp: 19, icon: 'cloud-sun', lat: 43.6532, lon: -79.3832 },
+  { name: 'San Francisco', state: 'CA', country: 'United States', code: 'US', condition: 'Foggy', temp: 17, icon: 'cloud', lat: 37.7749, lon: -122.4194 },
+  { name: 'Berlin', state: 'Berlin', country: 'Germany', code: 'DE', condition: 'Showers', temp: 19, icon: 'rain', lat: 52.5200, lon: 13.4050 },
+  { name: 'Rome', state: 'Lazio', country: 'Italy', code: 'IT', condition: 'Sunny', temp: 27, icon: 'sun', lat: 41.9028, lon: 12.4964 },
+  { name: 'Amsterdam', state: 'North Holland', country: 'Netherlands', code: 'NL', condition: 'Light Rain', temp: 17, icon: 'drizzle', lat: 52.3676, lon: 4.9041 },
+  { name: 'Bangkok', state: 'Bangkok', country: 'Thailand', code: 'TH', condition: 'Scattered Storms', temp: 31, icon: 'thunder', lat: 13.7563, lon: 100.5018 },
+  { name: 'Seoul', state: 'Seoul', country: 'South Korea', code: 'KR', condition: 'Clear', temp: 23, icon: 'sun', lat: 37.5665, lon: 126.9780 },
 ];
 
-// Additional global cities for "View More"
-const EXPANDED_CITIES = [
-  ...POPULAR_CITIES,
-  { name: 'London', condition: 'Drizzle', temp: 18, minTemp: 14, rain: 60, icon: 'drizzle', lat: 51.5074, lon: -0.1278 },
-  { name: 'Tokyo', condition: 'Clear', temp: 26, minTemp: 20, rain: 10, icon: 'sun', lat: 35.6762, lon: 139.6503 },
-  { name: 'New York', condition: 'Partly Cloudy', temp: 22, minTemp: 17, rain: 25, icon: 'cloud-sun', lat: 40.7128, lon: -74.0060 },
-  { name: 'Dubai', condition: 'Sunny & Hot', temp: 38, minTemp: 30, rain: 0, icon: 'sun', lat: 25.2048, lon: 55.2708 },
-  { name: 'Singapore', condition: 'Thunderstorm', temp: 29, minTemp: 25, rain: 80, icon: 'thunder', lat: 1.3521, lon: 103.8198 },
-  { name: 'Paris', condition: 'Cloudy', temp: 20, minTemp: 15, rain: 35, icon: 'cloud', lat: 48.8566, lon: 2.3522 },
-  { name: 'Sydney', condition: 'Sunny', temp: 21, minTemp: 16, rain: 15, icon: 'sun', lat: -33.8688, lon: 151.2093 }
-];
+const POPULAR_CITIES = CITY_DATABASE.slice(0, 5);
+const EXPANDED_CITIES = CITY_DATABASE;
 
 export default function App() {
   // Navigation & View States
@@ -72,6 +101,12 @@ export default function App() {
   const [activeForecastDayIndex, setActiveForecastDayIndex] = useState(3);
   const [hoveredHour, setHoveredHour] = useState(null);
   const [viewMoreCities, setViewMoreCities] = useState(false);
+
+  // Search Suggestions & History State
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [searchSuggestionIndex, setSearchSuggestionIndex] = useState(-1);
+  const [recentSearches, setRecentSearches] = useState(['Hyderabad', 'Mumbai', 'London', 'Tokyo', 'Delhi']);
+  const searchContainerRef = useRef(null);
 
   // Settings & Preferences
   const [unit, setUnit] = useState('C'); // 'C' or 'F'
@@ -490,19 +525,104 @@ export default function App() {
     return 'cloud';
   };
 
+  // Add to recent search terms
+  const addRecentSearch = (name) => {
+    if (!name || !name.trim()) return;
+    const clean = name.trim();
+    setRecentSearches((prev) => [clean, ...prev.filter((c) => c.toLowerCase() !== clean.toLowerCase())].slice(0, 6));
+  };
+
+  const removeRecentSearch = (term) => {
+    setRecentSearches((prev) => prev.filter((c) => c.toLowerCase() !== term.toLowerCase()));
+  };
+
+  const clearRecentSearches = () => {
+    setRecentSearches([]);
+    triggerToast('Recent searches cleared');
+  };
+
+  // Select city from suggestions, trending, or recent searches
+  const handleSelectSuggestion = (cityOrName) => {
+    const cityName = typeof cityOrName === 'string' ? cityOrName : cityOrName.name;
+    setActiveCity(cityName);
+    fetchCityWeather(cityName);
+    addRecentSearch(cityName);
+    setCityInput('');
+    setSearchFocused(false);
+    setSearchSuggestionIndex(-1);
+  };
+
   // Search Submission
   const handleSearchSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (searchSuggestionIndex >= 0 && filteredSuggestions[searchSuggestionIndex]) {
+      handleSelectSuggestion(filteredSuggestions[searchSuggestionIndex]);
+      return;
+    }
     if (cityInput.trim()) {
-      fetchCityWeather(cityInput.trim());
+      const q = cityInput.trim();
+      fetchCityWeather(q);
+      addRecentSearch(q);
       setCityInput('');
+      setSearchFocused(false);
+      setSearchSuggestionIndex(-1);
     }
   };
+
+  // Filter suggestions from CITY_DATABASE matching name, state, country, or code
+  const filteredSuggestions = cityInput.trim()
+    ? CITY_DATABASE.filter((c) => {
+        const q = cityInput.trim().toLowerCase();
+        return (
+          c.name.toLowerCase().includes(q) ||
+          (c.state && c.state.toLowerCase().includes(q)) ||
+          c.country.toLowerCase().includes(q) ||
+          c.code.toLowerCase() === q
+        );
+      }).slice(0, 8)
+    : [];
+
+  // Keyboard navigation for suggestions
+  const handleSearchKeyDown = (e) => {
+    if (!searchFocused) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSearchSuggestionIndex((prev) =>
+        prev < filteredSuggestions.length - 1 ? prev + 1 : 0
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSearchSuggestionIndex((prev) =>
+        prev > 0 ? prev - 1 : filteredSuggestions.length - 1
+      );
+    } else if (e.key === 'Enter') {
+      if (searchSuggestionIndex >= 0 && filteredSuggestions[searchSuggestionIndex]) {
+        e.preventDefault();
+        handleSelectSuggestion(filteredSuggestions[searchSuggestionIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      setSearchFocused(false);
+      setSearchSuggestionIndex(-1);
+    }
+  };
+
+  // Close search dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+        setSearchFocused(false);
+        setSearchSuggestionIndex(-1);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // City selection from Popular or Saved
   const handleSelectCity = (city) => {
     setActiveCity(city.name);
     fetchCityWeather(city.name);
+    addRecentSearch(city.name);
   };
 
   // GPS Locate Me with feedback
@@ -826,26 +946,179 @@ export default function App() {
 
           {/* TOP HEADER */}
           <header className="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-30">
-            {/* Search Input */}
-            <form onSubmit={handleSearchSubmit} className="w-full sm:max-w-md relative">
-              <input
-                type="text"
-                value={cityInput}
-                onChange={(e) => setCityInput(e.target.value)}
-                placeholder="Search city (e.g. Mumbai, Tokyo, London)..."
-                className="w-full pl-11 pr-10 py-2.5 bg-[#172b49]/70 border border-white/10 rounded-xl text-sm placeholder-slate-400 text-white focus:outline-none focus:border-blue-400/60 focus:bg-[#1a3254]/90 transition shadow-inner"
-              />
-              <Search className="absolute left-3.5 top-3 text-slate-400 w-4 h-4" />
-              {cityInput && (
-                <button
-                  type="button"
-                  onClick={() => setCityInput('')}
-                  className="absolute right-3 top-2.5 text-slate-400 hover:text-white p-0.5"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+            {/* Search Input with Auto-Suggestions & History */}
+            <div ref={searchContainerRef} className="w-full sm:max-w-md relative">
+              <form onSubmit={handleSearchSubmit} className="relative">
+                <input
+                  type="text"
+                  value={cityInput}
+                  onFocus={() => setSearchFocused(true)}
+                  onChange={(e) => {
+                    setCityInput(e.target.value);
+                    setSearchFocused(true);
+                    setSearchSuggestionIndex(-1);
+                  }}
+                  onKeyDown={handleSearchKeyDown}
+                  placeholder="Search city (e.g. Mumbai, Tokyo, London)..."
+                  className="w-full pl-11 pr-10 py-2.5 bg-[#172b49]/70 border border-white/10 rounded-xl text-sm placeholder-slate-400 text-white focus:outline-none focus:border-blue-400/60 focus:bg-[#1a3254]/90 transition shadow-inner"
+                />
+                <Search className="absolute left-3.5 top-3 text-slate-400 w-4 h-4" />
+                {cityInput && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCityInput('');
+                      setSearchSuggestionIndex(-1);
+                    }}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-white p-0.5"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </form>
+
+              {/* Suggestions Dropdown */}
+              {searchFocused && (
+                <div className="absolute left-0 right-0 mt-2 bg-[#0f213a]/95 border border-white/15 rounded-2xl shadow-2xl backdrop-blur-2xl z-50 overflow-hidden text-xs divide-y divide-white/5 animate-fade-in">
+                  {cityInput.trim().length > 0 ? (
+                    // Matching Suggestions when typing
+                    <div className="p-2">
+                      <div className="text-[10px] uppercase font-bold text-slate-400 px-2 py-1 flex items-center justify-between">
+                        <span>Matching Cities</span>
+                        <span>{filteredSuggestions.length} found</span>
+                      </div>
+
+                      {filteredSuggestions.length > 0 ? (
+                        <div className="flex flex-col gap-1 max-h-60 overflow-y-auto pr-1">
+                          {filteredSuggestions.map((city, idx) => {
+                            const isHighlighted = searchSuggestionIndex === idx;
+                            return (
+                              <button
+                                key={city.name + city.country}
+                                type="button"
+                                onClick={() => handleSelectSuggestion(city)}
+                                onMouseEnter={() => setSearchSuggestionIndex(idx)}
+                                className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all ${
+                                  isHighlighted
+                                    ? 'bg-blue-600/35 border border-blue-400/40 text-white'
+                                    : 'hover:bg-white/5 border border-transparent text-slate-200'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <span className="p-1 rounded-lg bg-white/5 text-sky-300">
+                                    <MapPin className="w-3.5 h-3.5" />
+                                  </span>
+                                  <div>
+                                    <span className="font-semibold text-white">{city.name}</span>
+                                    <span className="text-[11px] text-slate-400 ml-1.5">
+                                      {city.state ? `${city.state}, ` : ''}{city.country}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-sky-200 font-mono font-bold">
+                                    {city.code}
+                                  </span>
+                                  <span className="text-xs font-bold text-white">
+                                    {formatTemp(city.temp)}{tempSymbol}
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="py-4 px-3 text-center">
+                          <p className="text-xs text-slate-300">
+                            No predefined match for "<span className="text-sky-300">{cityInput}</span>"
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => handleSearchSubmit()}
+                            className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold shadow-md transition"
+                          >
+                            <Search className="w-3 h-3" />
+                            <span>Search global weather for "{cityInput}"</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    // Default State: Recent Searches + Popular/Trending Cities
+                    <div className="p-3 flex flex-col gap-3">
+                      {/* Recent Searches */}
+                      {recentSearches.length > 0 && (
+                        <div>
+                          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 mb-1.5">
+                            <span className="flex items-center gap-1.5">
+                              <History className="w-3.5 h-3.5 text-sky-400" />
+                              Recent Searches
+                            </span>
+                            <button
+                              type="button"
+                              onClick={clearRecentSearches}
+                              className="text-[10px] text-slate-400 hover:text-red-300 transition"
+                            >
+                              Clear All
+                            </button>
+                          </div>
+
+                          <div className="flex flex-wrap gap-1.5">
+                            {recentSearches.map((term) => (
+                              <div
+                                key={term}
+                                className="flex items-center gap-1 bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 py-1 rounded-lg text-xs text-slate-200 transition group"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => handleSelectSuggestion(term)}
+                                  className="hover:text-sky-300 text-left"
+                                >
+                                  {term}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeRecentSearch(term);
+                                  }}
+                                  className="text-slate-400 hover:text-red-300 p-0.5 ml-0.5"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Trending & Popular Cities */}
+                      <div>
+                        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 mb-1.5">
+                          <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Popular Indian & Global Hubs</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                          {['Hyderabad', 'Delhi', 'Mumbai', 'Bengaluru', 'London', 'Tokyo', 'New York', 'Dubai'].map((c) => (
+                            <button
+                              key={c}
+                              type="button"
+                              onClick={() => handleSelectSuggestion(c)}
+                              className="px-2 py-1.5 rounded-lg bg-white/5 hover:bg-blue-600/30 border border-white/5 hover:border-blue-400/30 text-left text-xs font-medium text-slate-200 hover:text-white transition flex items-center justify-between"
+                            >
+                              <span>{c}</span>
+                              <ChevronRight className="w-3 h-3 text-slate-500" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
-            </form>
+            </div>
 
             {/* Header Right Actions */}
             <div className="flex items-center gap-3.5 self-end sm:self-auto relative">
