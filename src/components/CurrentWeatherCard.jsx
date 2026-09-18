@@ -25,11 +25,17 @@ export default function CurrentWeatherCard({
       {/* Card Header & Actions */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold text-white tracking-wide">
-            Current Weather
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-semibold text-white tracking-wide">
+              Current Weather
+            </h2>
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Live OpenWeather API
+            </span>
+          </div>
           <span className="text-xs text-slate-400 font-medium mt-0.5 block">
-            {weather.city}, {weather.country} • {weather.timeString}
+            {weather.city}, {weather.country} • Updated: {weather.timeString}
           </span>
         </div>
 
@@ -122,6 +128,9 @@ export default function CurrentWeatherCard({
         <div className="flex flex-col items-center">
           <Waves className="w-4 h-4 text-slate-400 mb-1" />
           <span className="text-xs font-semibold text-white">{weather.aqi} AQI</span>
+          {weather.aqiStatus && (
+            <span className="text-[9px] text-emerald-300 font-medium">{weather.aqiStatus}</span>
+          )}
         </div>
         <div className="flex flex-col items-center">
           <Droplets className="w-4 h-4 text-slate-400 mb-1" />

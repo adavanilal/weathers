@@ -3,6 +3,7 @@ import WeatherIcon from './WeatherIcon';
 import { POPULAR_CITIES, EXPANDED_CITIES } from '../constants/cities';
 
 export default function PopularCitiesCard({
+  citiesList,
   viewMoreCities,
   setViewMoreCities,
   activeCity,
@@ -10,7 +11,8 @@ export default function PopularCitiesCard({
   formatTemp,
   tempSymbol,
 }) {
-  const displayCities = viewMoreCities ? EXPANDED_CITIES : POPULAR_CITIES;
+  const source = citiesList || EXPANDED_CITIES;
+  const displayCities = viewMoreCities ? source : source.slice(0, 5);
 
   return (
     <div className="lg:col-span-3 bg-[#182c4b]/80 border border-white/10 rounded-2xl p-4 shadow-lg flex flex-col justify-between backdrop-blur-md">
