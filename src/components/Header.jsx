@@ -10,6 +10,7 @@ import {
   ShieldAlert,
   ChevronRight,
   LogOut,
+  Loader2,
 } from 'lucide-react';
 
 export default function Header({
@@ -22,6 +23,7 @@ export default function Header({
   searchSuggestionIndex,
   setSearchSuggestionIndex,
   filteredSuggestions,
+  searchLoading,
   handleSelectSuggestion,
   recentSearches,
   removeRecentSearch,
@@ -61,22 +63,28 @@ export default function Header({
               setSearchSuggestionIndex(-1);
             }}
             onKeyDown={handleSearchKeyDown}
-            placeholder="Search city (e.g. Mumbai, Tokyo, London)..."
-            className="w-full pl-11 pr-10 py-2.5 bg-[#172b49]/70 border border-white/10 rounded-xl text-sm placeholder-slate-400 text-white focus:outline-none focus:border-blue-400/60 focus:bg-[#1a3254]/90 transition shadow-inner"
+            placeholder="Search any city worldwide (e.g. Paris, Kolkata, Austin)..."
+            className="w-full pl-11 pr-14 py-2.5 bg-[#172b49]/70 border border-white/10 rounded-xl text-sm placeholder-slate-400 text-white focus:outline-none focus:border-blue-400/60 focus:bg-[#1a3254]/90 transition shadow-inner"
           />
           <Search className="absolute left-3.5 top-3 text-slate-400 w-4 h-4" />
-          {cityInput && (
-            <button
-              type="button"
-              onClick={() => {
-                setCityInput('');
-                setSearchSuggestionIndex(-1);
-              }}
-              className="absolute right-3 top-2.5 text-slate-400 hover:text-white p-0.5"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+
+          <div className="absolute right-3 top-2.5 flex items-center gap-1">
+            {searchLoading && (
+              <Loader2 className="w-4 h-4 text-sky-400 animate-spin mr-0.5" />
+            )}
+            {cityInput && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCityInput('');
+                  setSearchSuggestionIndex(-1);
+                }}
+                className="text-slate-400 hover:text-white p-0.5"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </form>
 
         {/* Suggestions Dropdown */}
@@ -86,17 +94,25 @@ export default function Header({
               // Matching Suggestions when typing
               <div className="p-2">
                 <div className="text-[10px] uppercase font-bold text-slate-400 px-2 py-1 flex items-center justify-between">
-                  <span>Matching Cities</span>
-                  <span>{filteredSuggestions.length} found</span>
+                  <span className="flex items-center gap-1.5">
+                    <span>Global City Results</span>
+                    {searchLoading && <Loader2 className="w-2.5 h-2.5 text-sky-400 animate-spin" />}
+                  </span>
+                  <span className="text-sky-300 font-mono text-[9px]">Live API Enabled</span>
                 </div>
 
-                {filteredSuggestions.length > 0 ? (
-                  <div className="flex flex-col gap-1 max-h-60 overflow-y-auto pr-1">
+                {searchLoading && filteredSuggestions.length === 0 ? (
+                  <div className="py-6 px-3 text-center flex flex-col items-center justify-center gap-2">
+                    <Loader2 className="w-5 h-5 text-sky-400 animate-spin" />
+                    <p className="text-xs text-slate-300">Searching global cities via OpenWeather API...</p>
+                  </div>
+                ) : filteredSuggestions.length > 0 ? (
+                  <div className="flex flex-col gap-1 max-h-64 overflow-y-auto pr-1">
                     {filteredSuggestions.map((city, idx) => {
                       const isHighlighted = searchSuggestionIndex === idx;
                       return (
                         <button
-                          key={city.name + city.country}
+                          key={`${city.name}-${city.country}-${city.state || idx}`}
                           type="button"
                           onClick={() => handleSelectSuggestion(city)}
                           onMouseEnter={() => setSearchSuggestionIndex(idx)}
@@ -119,12 +135,20 @@ export default function Header({
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-sky-200 font-mono font-bold">
-                              {city.code}
-                            </span>
-                            <span className="text-xs font-bold text-white">
-                              {formatTemp(city.temp)}{tempSymbol}
-                            </span>
+                            {city.code && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-sky-200 font-mono font-bold">
+                                {city.code}
+                              </span>
+                            )}
+                            {city.temp !== null && city.temp !== undefined ? (
+                              <span className="text-xs font-bold text-white">
+                                {formatTemp(city.temp)}{tempSymbol}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/20 font-medium">
+                                Live
+                              </span>
+                            )}
                           </div>
                         </button>
                       );
@@ -133,7 +157,7 @@ export default function Header({
                 ) : (
                   <div className="py-4 px-3 text-center">
                     <p className="text-xs text-slate-300">
-                      No predefined match for "<span className="text-sky-300">{cityInput}</span>"
+                      Press enter to load global weather for "<span className="text-sky-300">{cityInput}</span>"
                     </p>
                     <button
                       type="button"
@@ -141,7 +165,7 @@ export default function Header({
                       className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold shadow-md transition"
                     >
                       <Search className="w-3 h-3" />
-                      <span>Search global weather for "{cityInput}"</span>
+                      <span>Search & Load Weather</span>
                     </button>
                   </div>
                 )}

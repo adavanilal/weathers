@@ -32,6 +32,8 @@ export default function App() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchSuggestionIndex, setSearchSuggestionIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState(['Hyderabad', 'Mumbai', 'London', 'Tokyo', 'Delhi']);
+  const [apiSuggestions, setApiSuggestions] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const searchContainerRef = useRef(null);
 
   // Settings & Preferences
@@ -425,12 +427,56 @@ export default function App() {
     triggerToast('Recent searches cleared');
   };
 
+  // Live OpenWeather Direct Geocoding API for global cities worldwide
+  useEffect(() => {
+    if (!cityInput || !cityInput.trim() || cityInput.trim().length < 2) {
+      setApiSuggestions([]);
+      setSearchLoading(false);
+      return;
+    }
+
+    const query = cityInput.trim();
+    setSearchLoading(true);
+
+    const timer = setTimeout(async () => {
+      try {
+        const geoRes = await fetch(
+          `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=7&appid=${API_KEY}`
+        );
+        if (geoRes.ok) {
+          const geoData = await geoRes.json();
+          const mapped = geoData.map((item) => ({
+            name: item.name,
+            state: item.state || '',
+            country: item.country || '',
+            code: item.country || 'GL',
+            lat: item.lat,
+            lon: item.lon,
+            temp: null, // live weather will be loaded upon selection
+            isApiResult: true,
+          }));
+          setApiSuggestions(mapped);
+        } else {
+          setApiSuggestions([]);
+        }
+      } catch (err) {
+        console.warn('Geocoding search error:', err);
+        setApiSuggestions([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [cityInput]);
+
   const handleSelectSuggestion = (cityOrName) => {
     const cityName = typeof cityOrName === 'string' ? cityOrName : cityOrName.name;
     setActiveCity(cityName);
     fetchCityWeather(cityName);
     addRecentSearch(cityName);
     setCityInput('');
+    setApiSuggestions([]);
     setSearchFocused(false);
     setSearchSuggestionIndex(-1);
   };
@@ -446,12 +492,14 @@ export default function App() {
       fetchCityWeather(q);
       addRecentSearch(q);
       setCityInput('');
+      setApiSuggestions([]);
       setSearchFocused(false);
       setSearchSuggestionIndex(-1);
     }
   };
 
-  const filteredSuggestions = cityInput.trim()
+  // Combine live OpenWeather API suggestions + local curated database
+  const localMatches = cityInput.trim()
     ? CITY_DATABASE.filter((c) => {
         const q = cityInput.trim().toLowerCase();
         return (
@@ -460,8 +508,35 @@ export default function App() {
           c.country.toLowerCase().includes(q) ||
           c.code.toLowerCase() === q
         );
-      }).slice(0, 8)
+      })
     : [];
+
+  // Deduplicate and combine API and local matches
+  const filteredSuggestions = (() => {
+    if (!cityInput.trim()) return [];
+    const seen = new Set();
+    const combined = [];
+
+    // Prioritize API results for global accuracy
+    apiSuggestions.forEach((item) => {
+      const key = `${item.name.toLowerCase()}-${item.country.toLowerCase()}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        combined.push(item);
+      }
+    });
+
+    // Add local matches that weren't already found
+    localMatches.forEach((item) => {
+      const key = `${item.name.toLowerCase()}-${item.country.toLowerCase()}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        combined.push(item);
+      }
+    });
+
+    return combined.slice(0, 8);
+  })();
 
   const handleSearchKeyDown = (e) => {
     if (!searchFocused) return;
@@ -670,6 +745,7 @@ export default function App() {
             searchSuggestionIndex={searchSuggestionIndex}
             setSearchSuggestionIndex={setSearchSuggestionIndex}
             filteredSuggestions={filteredSuggestions}
+            searchLoading={searchLoading}
             handleSelectSuggestion={handleSelectSuggestion}
             recentSearches={recentSearches}
             removeRecentSearch={removeRecentSearch}
