@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import L from 'leaflet';
 import {
   ZoomIn,
   ZoomOut,
@@ -7,10 +8,9 @@ import {
   Check,
   Map as MapIcon,
 } from 'lucide-react';
+import { getTileUrl } from '../constants/cities';
 
 export default function MiniMapCard({
-  mapContainerRef,
-  mapInstanceRef,
   weather,
   showMapMenu,
   setShowMapMenu,
@@ -18,6 +18,91 @@ export default function MiniMapCard({
   setMapLayer,
   setActiveNav,
 }) {
+  const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markerRef = useRef(null);
+  const tileLayerRef = useRef(null);
+
+  // Initialize and mount Leaflet map
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    // Safety cleanup in case of previous container binding
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
+    }
+
+    const map = L.map(mapContainerRef.current, {
+      zoomControl: false,
+      attributionControl: false,
+    }).setView([weather.lat || 17.3850, weather.lon || 78.4867], 9);
+
+    const tileLayer = L.tileLayer(getTileUrl(mapLayer), {
+      maxZoom: 19,
+    }).addTo(map);
+
+    const customIcon = L.divIcon({
+      className: 'radar-pulse-wrapper',
+      html: `<div class="radar-pulse"></div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+    });
+
+    const marker = L.marker([weather.lat || 17.3850, weather.lon || 78.4867], { icon: customIcon }).addTo(map);
+    marker.bindPopup(`<b style="color: #1e293b;">${weather.city}</b>`).openPopup();
+
+    mapInstanceRef.current = map;
+    markerRef.current = marker;
+    tileLayerRef.current = tileLayer;
+
+    // Invalidate size to ensure tiles fill the container completely
+    const t1 = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    }, 100);
+
+    const t2 = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    }, 350);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        markerRef.current = null;
+        tileLayerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update position and marker when active city coordinates change
+  useEffect(() => {
+    if (mapInstanceRef.current && weather.lat && weather.lon) {
+      mapInstanceRef.current.setView([weather.lat, weather.lon], 9, { animate: true });
+      if (markerRef.current) {
+        markerRef.current.setLatLng([weather.lat, weather.lon]);
+        markerRef.current.setPopupContent(`<b style="color: #1e293b;">${weather.city}</b>`).openPopup();
+      }
+    }
+  }, [weather.lat, weather.lon, weather.city]);
+
+  // Update tile layer when style is toggled (dark / streets / satellite)
+  useEffect(() => {
+    if (mapInstanceRef.current && tileLayerRef.current) {
+      mapInstanceRef.current.removeLayer(tileLayerRef.current);
+      const newLayer = L.tileLayer(getTileUrl(mapLayer), {
+        maxZoom: 19,
+      }).addTo(mapInstanceRef.current);
+      tileLayerRef.current = newLayer;
+    }
+  }, [mapLayer]);
+
   return (
     <div className="lg:col-span-5 bg-[#182c4b]/80 border border-white/10 rounded-2xl p-2.5 shadow-lg relative min-h-[220px] flex flex-col overflow-hidden">
       <div className="w-full h-full min-h-[200px] rounded-xl overflow-hidden relative">

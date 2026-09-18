@@ -1,20 +1,141 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import L from 'leaflet';
 import {
   Map as MapIcon,
   ZoomIn,
   ZoomOut,
   Crosshair,
 } from 'lucide-react';
+import { CITY_DATABASE, getTileUrl } from '../constants/cities';
 
 export default function FullWeatherMap({
-  fullMapContainerRef,
-  fullMapInstanceRef,
   weather,
   mapLayer,
   setMapLayer,
   formatTemp,
   tempSymbol,
+  handleSelectCity,
 }) {
+  const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markerRef = useRef(null);
+  const tileLayerRef = useRef(null);
+
+  // Initialize and mount Full Leaflet map
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
+    }
+
+    const map = L.map(mapContainerRef.current, {
+      zoomControl: false,
+      attributionControl: false,
+    }).setView([weather.lat || 17.3850, weather.lon || 78.4867], 9);
+
+    const tileLayer = L.tileLayer(getTileUrl(mapLayer), {
+      maxZoom: 19,
+    }).addTo(map);
+
+    const customIcon = L.divIcon({
+      className: 'radar-pulse-wrapper',
+      html: `<div class="radar-pulse"></div>`,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+    });
+
+    const marker = L.marker([weather.lat || 17.3850, weather.lon || 78.4867], { icon: customIcon }).addTo(map);
+    marker.bindPopup(
+      `<div style="color: #1e293b; text-align: center;"><b>${weather.city}</b><br/>${formatTemp(weather.temp)}${tempSymbol} • ${weather.condition}</div>`
+    ).openPopup();
+
+    // Key City Markers
+    CITY_DATABASE.slice(0, 15).forEach((c) => {
+      if (c.name.toLowerCase() !== weather.city.toLowerCase()) {
+        const cityMarker = L.circleMarker([c.lat, c.lon], {
+          radius: 7,
+          fillColor: '#38bdf8',
+          color: '#ffffff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.85,
+        }).addTo(map);
+
+        cityMarker.bindPopup(`
+          <div style="color: #0f172a; font-family: sans-serif; padding: 2px;">
+            <b style="font-size: 13px;">${c.name}</b><br/>
+            <span style="font-size: 11px; color: #475569;">${formatTemp(c.temp)}${tempSymbol} • ${c.condition}</span><br/>
+            <button id="btn-switch-${c.name}" style="margin-top: 6px; background: #2563eb; color: #fff; border: none; border-radius: 4px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 600;">
+              Switch Location
+            </button>
+          </div>
+        `);
+
+        cityMarker.on('popupopen', () => {
+          const btn = document.getElementById(`btn-switch-${c.name}`);
+          if (btn && handleSelectCity) {
+            btn.onclick = () => {
+              handleSelectCity(c);
+            };
+          }
+        });
+      }
+    });
+
+    mapInstanceRef.current = map;
+    markerRef.current = marker;
+    tileLayerRef.current = tileLayer;
+
+    const t1 = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    }, 100);
+
+    const t2 = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    }, 350);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        markerRef.current = null;
+        tileLayerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update active marker & view on city change
+  useEffect(() => {
+    if (mapInstanceRef.current && weather.lat && weather.lon) {
+      mapInstanceRef.current.setView([weather.lat, weather.lon], 9, { animate: true });
+      if (markerRef.current) {
+        markerRef.current.setLatLng([weather.lat, weather.lon]);
+        markerRef.current.setPopupContent(
+          `<div style="color: #1e293b; text-align: center;"><b>${weather.city}</b><br/>${formatTemp(weather.temp)}${tempSymbol} • ${weather.condition}</div>`
+        ).openPopup();
+      }
+    }
+  }, [weather.lat, weather.lon, weather.city]);
+
+  // Update tile layer on layer style switch
+  useEffect(() => {
+    if (mapInstanceRef.current && tileLayerRef.current) {
+      mapInstanceRef.current.removeLayer(tileLayerRef.current);
+      const newLayer = L.tileLayer(getTileUrl(mapLayer), {
+        maxZoom: 19,
+      }).addTo(mapInstanceRef.current);
+      tileLayerRef.current = newLayer;
+    }
+  }, [mapLayer]);
+
   return (
     <div className="flex flex-col gap-4 flex-1 h-full min-h-[480px]">
       <div className="flex items-center justify-between">
@@ -57,13 +178,13 @@ export default function FullWeatherMap({
 
       {/* Full Map Canvas */}
       <div className="w-full flex-1 min-h-[420px] rounded-2xl overflow-hidden border border-white/10 relative shadow-2xl">
-        <div ref={fullMapContainerRef} className="w-full h-full min-h-[420px]" />
+        <div ref={mapContainerRef} className="w-full h-full min-h-[420px]" />
 
         {/* Floating Map Zoom Tools */}
         <div className="absolute top-4 right-4 flex flex-col gap-2 z-[400]">
           <button
             onClick={() => {
-              if (fullMapInstanceRef.current) fullMapInstanceRef.current.zoomIn();
+              if (mapInstanceRef.current) mapInstanceRef.current.zoomIn();
             }}
             title="Zoom In"
             className="p-2 bg-[#101e33]/90 hover:bg-[#182e4e] text-white rounded-xl shadow-lg border border-white/20 backdrop-blur-md"
@@ -72,7 +193,7 @@ export default function FullWeatherMap({
           </button>
           <button
             onClick={() => {
-              if (fullMapInstanceRef.current) fullMapInstanceRef.current.zoomOut();
+              if (mapInstanceRef.current) mapInstanceRef.current.zoomOut();
             }}
             title="Zoom Out"
             className="p-2 bg-[#101e33]/90 hover:bg-[#182e4e] text-white rounded-xl shadow-lg border border-white/20 backdrop-blur-md"
@@ -81,8 +202,8 @@ export default function FullWeatherMap({
           </button>
           <button
             onClick={() => {
-              if (fullMapInstanceRef.current) {
-                fullMapInstanceRef.current.setView([weather.lat, weather.lon], 9, { animate: true });
+              if (mapInstanceRef.current) {
+                mapInstanceRef.current.setView([weather.lat, weather.lon], 9, { animate: true });
               }
             }}
             title="Center Active City"

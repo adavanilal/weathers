@@ -120,15 +120,6 @@ export default function App() {
 
   const [loading, setLoading] = useState(false);
 
-  // Map refs
-  const mapContainerRef = useRef(null);
-  const fullMapContainerRef = useRef(null);
-  const mapInstanceRef = useRef(null);
-  const fullMapInstanceRef = useRef(null);
-  const markerRef = useRef(null);
-  const fullMarkerRef = useRef(null);
-  const tileLayerRef = useRef(null);
-  const fullTileLayerRef = useRef(null);
 
   // Show quick toast notification
   const triggerToast = (msg) => {
@@ -155,147 +146,6 @@ export default function App() {
     return `${Math.round(kmh)} km/h`;
   };
 
-  // Map Tile URLs (Completely free, no watermarks, no API keys needed)
-  const getTileUrl = (layerType) => {
-    switch (layerType) {
-      case 'dark':
-        return 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
-      case 'satellite':
-        return 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-      case 'streets':
-      default:
-        return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-    }
-  };
-
-  // Setup Dashboard Mini Map
-  useEffect(() => {
-    if (activeNav !== 'dashboard' || !mapContainerRef.current) return;
-
-    if (!mapInstanceRef.current) {
-      const map = L.map(mapContainerRef.current, {
-        zoomControl: false,
-        attributionControl: false,
-      }).setView([weather.lat, weather.lon], 9);
-
-      const tileLayer = L.tileLayer(getTileUrl(mapLayer), {
-        maxZoom: 19,
-      }).addTo(map);
-
-      const customIcon = L.divIcon({
-        className: 'radar-pulse-wrapper',
-        html: `<div class="radar-pulse"></div>`,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-      });
-
-      const marker = L.marker([weather.lat, weather.lon], { icon: customIcon }).addTo(map);
-      marker.bindPopup(`<b style="color: #1e293b;">${weather.city}</b>`).openPopup();
-
-      mapInstanceRef.current = map;
-      markerRef.current = marker;
-      tileLayerRef.current = tileLayer;
-    } else {
-      mapInstanceRef.current.invalidateSize();
-      mapInstanceRef.current.setView([weather.lat, weather.lon], 9, { animate: true });
-      if (markerRef.current) {
-        markerRef.current.setLatLng([weather.lat, weather.lon]);
-        markerRef.current.setPopupContent(`<b style="color: #1e293b;">${weather.city}</b>`).openPopup();
-      }
-    }
-  }, [weather.lat, weather.lon, weather.city, activeNav]);
-
-  // Update Mini Map Tile Layer on style change
-  useEffect(() => {
-    if (mapInstanceRef.current && tileLayerRef.current) {
-      mapInstanceRef.current.removeLayer(tileLayerRef.current);
-      const newLayer = L.tileLayer(getTileUrl(mapLayer), {
-        maxZoom: 19,
-      }).addTo(mapInstanceRef.current);
-      tileLayerRef.current = newLayer;
-    }
-  }, [mapLayer]);
-
-  // Update Full Map Tile Layer on style change
-  useEffect(() => {
-    if (fullMapInstanceRef.current && fullTileLayerRef.current) {
-      fullMapInstanceRef.current.removeLayer(fullTileLayerRef.current);
-      const newLayer = L.tileLayer(getTileUrl(mapLayer), {
-        maxZoom: 19,
-      }).addTo(fullMapInstanceRef.current);
-      fullTileLayerRef.current = newLayer;
-    }
-  }, [mapLayer]);
-
-  // Setup Dedicated Full Weather Map view
-  useEffect(() => {
-    if (activeNav !== 'map' || !fullMapContainerRef.current) return;
-
-    if (!fullMapInstanceRef.current) {
-      const map = L.map(fullMapContainerRef.current, {
-        zoomControl: false,
-        attributionControl: false,
-      }).setView([weather.lat, weather.lon], 9);
-
-      const tileLayer = L.tileLayer(getTileUrl(mapLayer), {
-        maxZoom: 19,
-        subdomains: 'abcd',
-      }).addTo(map);
-
-      const customIcon = L.divIcon({
-        className: 'radar-pulse-wrapper',
-        html: `<div class="radar-pulse"></div>`,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
-      });
-      const marker = L.marker([weather.lat, weather.lon], { icon: customIcon }).addTo(map);
-      marker.bindPopup(`<div style="color: #1e293b; text-align: center;"><b>${weather.city}</b><br/>${formatTemp(weather.temp)}${tempSymbol} • ${weather.condition}</div>`).openPopup();
-
-      // Markers for Key Cities
-      CITY_DATABASE.slice(0, 12).forEach((c) => {
-        if (c.name.toLowerCase() !== weather.city.toLowerCase()) {
-          const cityMarker = L.circleMarker([c.lat, c.lon], {
-            radius: 8,
-            fillColor: '#38bdf8',
-            color: '#ffffff',
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.85,
-          }).addTo(map);
-
-          cityMarker.bindPopup(`
-            <div style="color: #0f172a; font-family: sans-serif; padding: 2px;">
-              <b style="font-size: 13px;">${c.name}</b><br/>
-              <span style="font-size: 11px; color: #475569;">${formatTemp(c.temp)}${tempSymbol} • ${c.condition}</span><br/>
-              <button id="btn-switch-${c.name}" style="margin-top: 6px; background: #2563eb; color: #fff; border: none; border-radius: 4px; padding: 3px 8px; font-size: 10px; cursor: pointer;">
-                Switch Location
-              </button>
-            </div>
-          `);
-
-          cityMarker.on('popupopen', () => {
-            const btn = document.getElementById(`btn-switch-${c.name}`);
-            if (btn) {
-              btn.onclick = () => {
-                handleSelectCity(c);
-              };
-            }
-          });
-        }
-      });
-
-      fullMapInstanceRef.current = map;
-      fullMarkerRef.current = marker;
-      fullTileLayerRef.current = tileLayer;
-    } else {
-      fullMapInstanceRef.current.invalidateSize();
-      fullMapInstanceRef.current.setView([weather.lat, weather.lon], 9, { animate: true });
-      if (fullMarkerRef.current) {
-        fullMarkerRef.current.setLatLng([weather.lat, weather.lon]);
-        fullMarkerRef.current.setPopupContent(`<div style="color: #1e293b; text-align: center;"><b>${weather.city}</b><br/>${formatTemp(weather.temp)}${tempSymbol} • ${weather.condition}</div>`).openPopup();
-      }
-    }
-  }, [weather.lat, weather.lon, weather.city, activeNav, mapLayer, unit]);
 
   // Radar Timeline Auto-Play Loop
   useEffect(() => {
@@ -863,8 +713,6 @@ export default function App() {
                 />
 
                 <MiniMapCard
-                  mapContainerRef={mapContainerRef}
-                  mapInstanceRef={mapInstanceRef}
                   weather={weather}
                   showMapMenu={showMapMenu}
                   setShowMapMenu={setShowMapMenu}
@@ -915,13 +763,12 @@ export default function App() {
           {/* 2. Full Weather Map View */}
           {activeNav === 'map' && (
             <FullWeatherMap
-              fullMapContainerRef={fullMapContainerRef}
-              fullMapInstanceRef={fullMapInstanceRef}
               weather={weather}
               mapLayer={mapLayer}
               setMapLayer={setMapLayer}
               formatTemp={formatTemp}
               tempSymbol={tempSymbol}
+              handleSelectCity={handleSelectCity}
             />
           )}
 
