@@ -32,12 +32,35 @@
         margin: 0;
         padding: 0;
       }
-      /* Custom map styling to match frosted glass */
+      /* Sleek dark map styling with visible roads and geographic details */
       .leaflet-container {
         width: 100%;
         height: 100%;
-        background-color: #243b55;
+        background-color: #101926;
         border-radius: 1rem;
+      }
+      /* Dark navy map tiles with crisp visible contrast */
+      .pitch-dark-map .leaflet-tile {
+        filter: brightness(0.75) contrast(1.2) hue-rotate(205deg) saturate(0.8) !important;
+      }
+      /* Sleek dark popup styling */
+      .leaflet-popup-content-wrapper {
+        background: rgba(13, 22, 38, 0.95) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(12px) !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+        border-radius: 12px !important;
+      }
+      .leaflet-popup-tip {
+        background: rgba(13, 22, 38, 0.95) !important;
+      }
+      .leaflet-container a.leaflet-popup-close-button {
+        color: #94a3b8 !important;
+        padding: 4px 6px 0 0 !important;
+      }
+      .leaflet-container a.leaflet-popup-close-button:hover {
+        color: #ffffff !important;
       }
       /* Hide standard leaflet attribution for clean UI */
       .leaflet-control-attribution {

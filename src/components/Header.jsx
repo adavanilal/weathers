@@ -47,9 +47,9 @@ export default function Header({
   triggerToast,
 }) {
   return (
-    <header className="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-30">
+    <header className="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-[999]">
       {/* Search Input with Auto-Suggestions & History */}
-      <div ref={searchContainerRef} className="w-full sm:max-w-md relative">
+      <div ref={searchContainerRef} className="w-full sm:max-w-md relative z-[1000]">
         <form onSubmit={handleSearchSubmit} className="relative">
           <input
             type="text"
@@ -81,7 +81,7 @@ export default function Header({
 
         {/* Suggestions Dropdown */}
         {searchFocused && (
-          <div className="absolute left-0 right-0 mt-2 bg-[#0f213a]/95 border border-white/15 rounded-2xl shadow-2xl backdrop-blur-2xl z-50 overflow-hidden text-xs divide-y divide-white/5 animate-fade-in">
+          <div className="absolute left-0 right-0 mt-2 bg-[#0f213a]/95 border border-white/15 rounded-2xl shadow-2xl backdrop-blur-2xl z-[1001] overflow-hidden text-xs divide-y divide-white/5 animate-fade-in">
             {cityInput.trim().length > 0 ? (
               // Matching Suggestions when typing
               <div className="p-2">

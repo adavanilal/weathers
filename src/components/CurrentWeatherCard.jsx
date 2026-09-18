@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   MapPin,
   RefreshCw,
@@ -20,6 +20,21 @@ export default function CurrentWeatherCard({
   unit,
   formatWind,
 }) {
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+
+  const handleRefreshClick = async () => {
+    setIsManualRefreshing(true);
+    try {
+      if (fetchCityWeather) {
+        await fetchCityWeather(weather.city);
+      }
+    } finally {
+      setTimeout(() => {
+        setIsManualRefreshing(false);
+      }, 700);
+    }
+  };
+
   return (
     <div className="lg:col-span-4 bg-[#182c4b]/80 border border-white/10 rounded-2xl p-5 shadow-lg flex flex-col justify-between relative overflow-hidden backdrop-blur-md">
       {/* Card Header & Actions */}
@@ -55,14 +70,12 @@ export default function CurrentWeatherCard({
 
           {/* Refresh Weather Button */}
           <button
-            onClick={() => fetchCityWeather(weather.city)}
+            onClick={handleRefreshClick}
             title="Refresh live data"
-            disabled={loading}
-            className={`p-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-white transition ${
-              loading ? 'animate-spin' : ''
-            }`}
+            disabled={isManualRefreshing}
+            className="p-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-slate-300 hover:text-white transition"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <RefreshCw className={`w-3.5 h-3.5 ${isManualRefreshing ? 'animate-spin text-sky-400' : ''}`} />
           </button>
         </div>
       </div>

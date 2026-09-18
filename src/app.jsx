@@ -698,7 +698,7 @@ export default function App() {
           {/* 1. Dashboard View */}
           {activeNav === 'dashboard' && (
             <>
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 relative z-10">
                 <CurrentWeatherCard
                   weather={weather}
                   isCityFavorite={isCityFavorite}

@@ -50,7 +50,7 @@ export default function MiniMapCard({
     });
 
     const marker = L.marker([weather.lat || 17.3850, weather.lon || 78.4867], { icon: customIcon }).addTo(map);
-    marker.bindPopup(`<b style="color: #1e293b;">${weather.city}</b>`).openPopup();
+    marker.bindPopup(`<b style="color: #f8fafc; font-size: 13px;">${weather.city}</b>`).openPopup();
 
     mapInstanceRef.current = map;
     markerRef.current = marker;
@@ -87,7 +87,7 @@ export default function MiniMapCard({
       mapInstanceRef.current.setView([weather.lat, weather.lon], 9, { animate: true });
       if (markerRef.current) {
         markerRef.current.setLatLng([weather.lat, weather.lon]);
-        markerRef.current.setPopupContent(`<b style="color: #1e293b;">${weather.city}</b>`).openPopup();
+        markerRef.current.setPopupContent(`<b style="color: #f8fafc; font-size: 13px;">${weather.city}</b>`).openPopup();
       }
     }
   }, [weather.lat, weather.lon, weather.city]);
@@ -106,7 +106,10 @@ export default function MiniMapCard({
   return (
     <div className="lg:col-span-5 bg-[#182c4b]/80 border border-white/10 rounded-2xl p-2.5 shadow-lg relative min-h-[220px] flex flex-col overflow-hidden">
       <div className="w-full h-full min-h-[200px] rounded-xl overflow-hidden relative">
-        <div ref={mapContainerRef} className="w-full h-full min-h-[200px]" />
+        <div
+          ref={mapContainerRef}
+          className={`w-full h-full min-h-[200px] transition-all ${mapLayer === 'dark' ? 'pitch-dark-map' : ''}`}
+        />
 
         {/* Floating Map Controls */}
         <div className="absolute top-3 right-3 flex items-center gap-1.5 z-[400]">

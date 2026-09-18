@@ -48,7 +48,7 @@ export default function FullWeatherMap({
 
     const marker = L.marker([weather.lat || 17.3850, weather.lon || 78.4867], { icon: customIcon }).addTo(map);
     marker.bindPopup(
-      `<div style="color: #1e293b; text-align: center;"><b>${weather.city}</b><br/>${formatTemp(weather.temp)}${tempSymbol} • ${weather.condition}</div>`
+      `<div style="color: #f8fafc; text-align: center; font-family: sans-serif;"><b>${weather.city}</b><br/><span style="color: #94a3b8; font-size: 11px;">${formatTemp(weather.temp)}${tempSymbol} • ${weather.condition}</span></div>`
     ).openPopup();
 
     // Key City Markers
@@ -64,10 +64,10 @@ export default function FullWeatherMap({
         }).addTo(map);
 
         cityMarker.bindPopup(`
-          <div style="color: #0f172a; font-family: sans-serif; padding: 2px;">
+          <div style="color: #f8fafc; font-family: sans-serif; padding: 2px;">
             <b style="font-size: 13px;">${c.name}</b><br/>
-            <span style="font-size: 11px; color: #475569;">${formatTemp(c.temp)}${tempSymbol} • ${c.condition}</span><br/>
-            <button id="btn-switch-${c.name}" style="margin-top: 6px; background: #2563eb; color: #fff; border: none; border-radius: 4px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 600;">
+            <span style="font-size: 11px; color: #94a3b8;">${formatTemp(c.temp)}${tempSymbol} • ${c.condition}</span><br/>
+            <button id="btn-switch-${c.name}" style="margin-top: 6px; background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-weight: 600;">
               Switch Location
             </button>
           </div>
@@ -178,7 +178,10 @@ export default function FullWeatherMap({
 
       {/* Full Map Canvas */}
       <div className="w-full flex-1 min-h-[420px] rounded-2xl overflow-hidden border border-white/10 relative shadow-2xl">
-        <div ref={mapContainerRef} className="w-full h-full min-h-[420px]" />
+        <div
+          ref={mapContainerRef}
+          className={`w-full h-full min-h-[420px] transition-all ${mapLayer === 'dark' ? 'pitch-dark-map' : ''}`}
+        />
 
         {/* Floating Map Zoom Tools */}
         <div className="absolute top-4 right-4 flex flex-col gap-2 z-[400]">
