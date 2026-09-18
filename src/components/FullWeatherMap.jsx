@@ -34,7 +34,7 @@ export default function FullWeatherMap({
     const map = L.map(mapContainerRef.current, {
       zoomControl: false,
       attributionControl: false,
-    }).setView([weather.lat || 17.3850, weather.lon || 78.4867], 9);
+    }).setView([weather.lat || 25.5941, weather.lon || 85.1376], 9);
 
     const tileLayer = L.tileLayer(getTileUrl(mapLayer), {
       maxZoom: 19,
@@ -47,7 +47,7 @@ export default function FullWeatherMap({
       iconAnchor: [12, 12],
     });
 
-    const marker = L.marker([weather.lat || 17.3850, weather.lon || 78.4867], { icon: customIcon }).addTo(map);
+    const marker = L.marker([weather.lat || 25.5941, weather.lon || 85.1376], { icon: customIcon }).addTo(map);
     marker.bindPopup(
       `<div style="color: #f8fafc; text-align: center; font-family: sans-serif;"><b>${weather.city}</b><br/><span style="color: #94a3b8; font-size: 11px;">${formatTemp(weather.temp)}${tempSymbol} • ${weather.condition}</span></div>`
     ).openPopup();

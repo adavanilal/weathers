@@ -4,7 +4,7 @@ export const API_KEY = "b8b969778b291dfb7a094d1c8ad2bd93";
 export const DEFAULT_POPULAR_CITIES = [
   'Delhi',
   'Mumbai',
-  'Hyderabad',
+  'Patna',
   'Bengaluru',
   'Kolkata',
   'Chennai',

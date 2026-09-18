@@ -20,7 +20,7 @@ import ProfileEditModal from './components/ProfileEditModal';
 export default function App() {
   // Navigation & View States
   const [activeNav, setActiveNav] = useState('dashboard');
-  const [activeCity, setActiveCity] = useState('Hyderabad');
+  const [activeCity, setActiveCity] = useState('Patna');
   const [cityInput, setCityInput] = useState('');
   const [forecastDays, setForecastDays] = useState(7);
   const [activeTab, setActiveTab] = useState('Summary');
@@ -41,7 +41,7 @@ export default function App() {
   // Search Suggestions & History State
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchSuggestionIndex, setSearchSuggestionIndex] = useState(-1);
-  const [recentSearches, setRecentSearches] = useState(['Hyderabad', 'Mumbai', 'London', 'Tokyo', 'Delhi']);
+  const [recentSearches, setRecentSearches] = useState(['Patna', 'Delhi', 'Mumbai', 'London', 'Tokyo']);
   const [apiSuggestions, setApiSuggestions] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const searchContainerRef = useRef(null);
@@ -62,7 +62,7 @@ export default function App() {
 
   // Saved / Favorite Locations
   const [favorites, setFavorites] = useState([
-    { name: 'Hyderabad', temp: 24, condition: 'Heavy Rain', country: 'IN', lat: 17.3850, lon: 78.4867 },
+    { name: 'Patna', temp: 28, condition: 'Clear', country: 'IN', lat: 25.5941, lon: 85.1376 },
     { name: 'Bangalore', temp: 23, condition: 'Light Thunders', country: 'IN', lat: 12.9716, lon: 77.5946 },
     { name: 'London', temp: 18, condition: 'Drizzle', country: 'GB', lat: 51.5074, lon: -0.1278 },
     { name: 'Tokyo', temp: 26, condition: 'Clear', country: 'JP', lat: 35.6762, lon: 139.6503 }
@@ -84,23 +84,23 @@ export default function App() {
 
   // Current Weather State
   const [weather, setWeather] = useState({
-    city: 'Hyderabad',
+    city: 'Patna',
     country: 'IN',
-    temp: 24,
-    feelsLike: 23,
-    condition: 'Heavy Rain',
-    description: 'thunderstorm with heavy rain',
-    humidity: 92,
-    windSpeed: 6,
-    aqi: 173,
-    uv: 3,
-    pressure: 1012,
-    visibility: 8.5,
+    temp: 28,
+    feelsLike: 29,
+    condition: 'Clear',
+    description: 'clear sky',
+    humidity: 68,
+    windSpeed: 7,
+    aqi: 142,
+    uv: 4,
+    pressure: 1011,
+    visibility: 9.0,
     dewPoint: 21,
-    sunrise: '06:05 AM',
-    sunset: '06:42 PM',
-    lat: 17.3850,
-    lon: 78.4867,
+    sunrise: '05:38 AM',
+    sunset: '05:52 PM',
+    lat: 25.5941,
+    lon: 85.1376,
     timeString: '6:25 PM',
   });
 
@@ -875,11 +875,11 @@ export default function App() {
         onClose={() => setShowLogoutModal(false)}
         onConfirm={() => {
           setShowLogoutModal(false);
-          setActiveCity('Hyderabad');
-          fetchCityWeather('Hyderabad');
+          setActiveCity('Patna');
+          fetchCityWeather('Patna');
           setActiveNav('dashboard');
           setUnit('C');
-          triggerToast('Session reset to Hyderabad');
+          triggerToast('Session reset to Patna');
         }}
       />
     </div>

@@ -246,7 +246,7 @@ export default function Header({
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                    {['Hyderabad', 'Delhi', 'Mumbai', 'Bengaluru', 'London', 'Tokyo', 'New York', 'Dubai'].map((c) => (
+                    {['Patna', 'Delhi', 'Mumbai', 'Bengaluru', 'London', 'Tokyo', 'New York', 'Dubai'].map((c) => (
                       <button
                         key={c}
                         type="button"

@@ -36,7 +36,7 @@ export default function MiniMapCard({
     const map = L.map(mapContainerRef.current, {
       zoomControl: false,
       attributionControl: false,
-    }).setView([weather.lat || 17.3850, weather.lon || 78.4867], 9);
+    }).setView([weather.lat || 25.5941, weather.lon || 85.1376], 9);
 
     const tileLayer = L.tileLayer(getTileUrl(mapLayer), {
       maxZoom: 19,
@@ -49,7 +49,7 @@ export default function MiniMapCard({
       iconAnchor: [12, 12],
     });
 
-    const marker = L.marker([weather.lat || 17.3850, weather.lon || 78.4867], { icon: customIcon }).addTo(map);
+    const marker = L.marker([weather.lat || 25.5941, weather.lon || 85.1376], { icon: customIcon }).addTo(map);
     marker.bindPopup(`<b style="color: #f8fafc; font-size: 13px;">${weather.city}</b>`).openPopup();
 
     mapInstanceRef.current = map;
