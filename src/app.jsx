@@ -15,6 +15,7 @@ import DopplerRadar from './components/DopplerRadar';
 import SavedLocations from './components/SavedLocations';
 import SettingsView from './components/SettingsView';
 import LogoutModal from './components/LogoutModal';
+import ProfileEditModal from './components/ProfileEditModal';
 
 export default function App() {
   // Navigation & View States
@@ -27,6 +28,15 @@ export default function App() {
   const [hoveredHour, setHoveredHour] = useState(null);
   const [viewMoreCities, setViewMoreCities] = useState(false);
   const [popularCitiesList, setPopularCitiesList] = useState([]);
+
+  // User Profile State (persisted in localStorage)
+  const [profileName, setProfileName] = useState(() => {
+    return localStorage.getItem('aether_profile_name') || 'Amit Lal';
+  });
+  const [profileAvatar, setProfileAvatar] = useState(() => {
+    return localStorage.getItem('aether_profile_avatar') || 'https://api.dicebear.com/7.x/bottts/svg?seed=AetherSky';
+  });
+  const [showProfileEditModal, setShowProfileEditModal] = useState(false);
 
   // Search Suggestions & History State
   const [searchFocused, setSearchFocused] = useState(false);
@@ -620,66 +630,58 @@ export default function App() {
   const unreadCount = notifications.filter(n => n.unread).length;
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center p-3 md:p-6 lg:p-8 overflow-hidden bg-gradient-to-b from-[#195bb0] via-[#246bbd] to-[#124b94]">
+    <div className="relative min-h-screen w-full flex items-center justify-center p-3 md:p-6 lg:p-8 overflow-hidden bg-[#071326] text-slate-100">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-5 z-50 bg-[#0f223f]/95 border border-sky-400/40 text-sky-100 text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl backdrop-blur-xl flex items-center gap-2 animate-fade-in">
-          <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+        <div className="fixed top-5 z-50 bg-[#0f223f]/90 border border-sky-400/40 text-sky-100 text-xs font-semibold px-5 py-2.5 rounded-full shadow-2xl backdrop-blur-2xl flex items-center gap-2 animate-fade-in apple-glass-pill">
+          <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
           {toastMessage}
         </div>
       )}
 
-      {/* Floating Background Clouds */}
-      <div className="absolute -top-10 -left-12 pointer-events-none select-none opacity-90 z-0 drop-shadow-[0_20px_35px_rgba(0,0,0,0.25)] animate-[pulse_8s_ease-in-out_infinite]">
-        <svg width="280" height="180" viewBox="0 0 280 180" fill="none">
-          <ellipse cx="100" cy="110" rx="75" ry="45" fill="url(#cloudGrad1)" />
-          <ellipse cx="160" cy="90" rx="65" ry="55" fill="url(#cloudGrad2)" />
-          <ellipse cx="205" cy="115" rx="55" ry="38" fill="url(#cloudGrad1)" />
-          <ellipse cx="140" cy="120" rx="90" ry="35" fill="url(#cloudGrad3)" />
-          <defs>
-            <linearGradient id="cloudGrad1" x1="50" y1="60" x2="160" y2="150" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#ffffff" />
-              <stop offset="1" stopColor="#c5dcfa" />
-            </linearGradient>
-            <linearGradient id="cloudGrad2" x1="120" y1="40" x2="200" y2="140" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#ffffff" />
-              <stop offset="1" stopColor="#b4d2f8" />
-            </linearGradient>
-            <linearGradient id="cloudGrad3" x1="100" y1="90" x2="180" y2="150" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#e8f2fe" />
-              <stop offset="1" stopColor="#9cc2f3" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
+      {/* Apple Liquid Glass Atmospheric Mesh Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 select-none">
+        {/* Ambient Liquid Orbs */}
+        <div
+          className={`absolute -top-36 -left-36 w-[600px] h-[600px] rounded-full blur-[110px] opacity-70 animate-liquid-1 transition-all duration-1000 ${
+            (weather.condition || '').toLowerCase().includes('rain') || (weather.condition || '').toLowerCase().includes('thunder')
+              ? 'bg-gradient-to-tr from-cyan-500 via-blue-700 to-indigo-950'
+              : (weather.condition || '').toLowerCase().includes('clear')
+              ? 'bg-gradient-to-tr from-amber-500 via-yellow-500 to-blue-700'
+              : 'bg-gradient-to-tr from-sky-400 via-indigo-600 to-slate-900'
+          }`}
+        />
+        <div
+          className={`absolute top-[18%] -right-36 w-[650px] h-[650px] rounded-full blur-[130px] opacity-60 animate-liquid-2 transition-all duration-1000 ${
+            (weather.condition || '').toLowerCase().includes('rain') || (weather.condition || '').toLowerCase().includes('thunder')
+              ? 'bg-gradient-to-bl from-purple-800 via-indigo-900 to-cyan-900'
+              : (weather.condition || '').toLowerCase().includes('clear')
+              ? 'bg-gradient-to-bl from-amber-400 via-sky-600 to-indigo-900'
+              : 'bg-gradient-to-bl from-indigo-700 via-cyan-800 to-slate-900'
+          }`}
+        />
+        <div
+          className="absolute -bottom-48 left-[22%] w-[700px] h-[550px] rounded-full blur-[140px] opacity-50 bg-gradient-to-t from-blue-600 via-indigo-900 to-cyan-800 animate-liquid-3 pointer-events-none"
+        />
 
-      <div className="absolute -top-6 left-[38%] pointer-events-none select-none opacity-85 z-0 drop-shadow-[0_15px_30px_rgba(0,0,0,0.2)]">
-        <svg width="220" height="140" viewBox="0 0 220 140" fill="none">
-          <ellipse cx="80" cy="85" rx="60" ry="38" fill="url(#cloudGrad1)" />
-          <ellipse cx="130" cy="70" rx="50" ry="42" fill="url(#cloudGrad2)" />
-          <ellipse cx="165" cy="90" rx="42" ry="30" fill="url(#cloudGrad1)" />
-        </svg>
-      </div>
-
-      <div className="absolute -top-8 -right-8 pointer-events-none select-none opacity-90 z-0 drop-shadow-[0_20px_35px_rgba(0,0,0,0.25)] animate-[pulse_10s_ease-in-out_infinite]">
-        <svg width="260" height="170" viewBox="0 0 260 170" fill="none">
-          <ellipse cx="170" cy="100" rx="70" ry="42" fill="url(#cloudGrad1)" />
-          <ellipse cx="110" cy="80" rx="60" ry="50" fill="url(#cloudGrad2)" />
-          <ellipse cx="70" cy="105" rx="50" ry="35" fill="url(#cloudGrad1)" />
-        </svg>
+        {/* Specular Liquid Wave Highlight */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.08)_0%,_transparent_65%)]" />
       </div>
 
       {/* Main Glass Container */}
-      <div className="relative z-10 w-full max-w-[1240px] bg-[#12233c]/85 backdrop-blur-2xl border border-white/10 rounded-[28px] md:rounded-[34px] shadow-[0_25px_80px_rgba(3,14,38,0.65)] overflow-hidden flex flex-col md:flex-row min-h-[640px]">
+      <div className="relative z-10 w-full max-w-[1260px] apple-liquid-shell rounded-[34px] md:rounded-[40px] overflow-hidden flex flex-col md:flex-row min-h-[660px]">
         {/* Navigation Rail */}
         <NavigationRail
           activeNav={activeNav}
           setActiveNav={setActiveNav}
           onOpenLogout={() => setShowLogoutModal(true)}
+          profileAvatar={profileAvatar}
+          profileName={profileName}
+          onOpenEditProfile={() => setShowProfileEditModal(true)}
         />
 
         {/* Main Body */}
-        <main className="flex-1 p-5 md:p-7 flex flex-col gap-6 overflow-y-auto relative">
+        <main className="flex-1 p-5 md:p-7 flex flex-col gap-6 overflow-y-auto no-scrollbar relative">
           {/* Header */}
           <Header
             cityInput={cityInput}
@@ -709,6 +711,11 @@ export default function App() {
             clearAllNotifications={clearAllNotifications}
             showProfileModal={showProfileModal}
             setShowProfileModal={setShowProfileModal}
+            profileName={profileName}
+            setProfileName={setProfileName}
+            profileAvatar={profileAvatar}
+            setProfileAvatar={setProfileAvatar}
+            onOpenEditProfile={() => setShowProfileEditModal(true)}
             favoritesCount={favorites.length}
             setActiveNav={setActiveNav}
             onOpenLogout={() => setShowLogoutModal(true)}
@@ -836,6 +843,9 @@ export default function App() {
               setTimeFormat={setTimeFormat}
               mapLayer={mapLayer}
               setMapLayer={setMapLayer}
+              profileName={profileName}
+              profileAvatar={profileAvatar}
+              onOpenEditProfile={() => setShowProfileEditModal(true)}
               onResetDefaults={() => {
                 setUnit('C');
                 setWindUnit('km/h');
@@ -847,6 +857,17 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {/* Profile Name & Cool Avatar Edit Modal */}
+      <ProfileEditModal
+        isOpen={showProfileEditModal}
+        onClose={() => setShowProfileEditModal(false)}
+        profileName={profileName}
+        setProfileName={setProfileName}
+        profileAvatar={profileAvatar}
+        setProfileAvatar={setProfileAvatar}
+        triggerToast={triggerToast}
+      />
 
       {/* Logout / Session Reset Modal */}
       <LogoutModal

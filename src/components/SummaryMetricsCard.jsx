@@ -50,27 +50,29 @@ export default function SummaryMetricsCard({
   const areaPath = `${wavePath} L ${points[points.length - 1].x},${chartHeight + 20} L ${points[0].x},${chartHeight + 20} Z`;
 
   return (
-    <div className="lg:col-span-8 bg-[#182c4b]/80 border border-white/10 rounded-2xl p-5 shadow-lg flex flex-col justify-between backdrop-blur-md relative overflow-hidden">
-      {/* Subtle rainfall pattern */}
-      <div className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(#93c5fd_1px,transparent_1px)] [background-size:16px_16px]" />
+    <div className="lg:col-span-8 apple-glass-card rounded-[28px] p-6 shadow-2xl flex flex-col justify-between relative overflow-hidden select-none">
+      {/* Dynamic Specular Liquid Highlight */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
 
       {/* Segmented Tabs */}
       <div className="flex items-center justify-between mb-2 relative z-10">
-        <h2 className="text-sm font-semibold text-white tracking-wide">
+        <h2 className="text-sm font-bold text-white tracking-wide">
           {activeTab === 'Summary'
-            ? 'Summary & Precipitation'
+            ? 'Summary & Precipitation Wave'
             : activeTab === 'Hourly'
-            ? 'Hourly Forecast'
-            : 'Meteorological Metrics'}
+            ? 'Hourly Forecast Timeline'
+            : 'Meteorological Conditions'}
         </h2>
-        <div className="bg-[#12233c] p-0.5 rounded-lg border border-white/10 flex items-center text-[11px]">
+
+        {/* Apple Segmented Pill */}
+        <div className="bg-black/25 p-1 rounded-full border border-white/15 flex items-center text-[11px] backdrop-blur-md">
           {['Summary', 'Hourly', 'More Details'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-3 py-1 rounded-md transition-all font-medium ${
+              className={`px-3.5 py-1 rounded-full transition-all font-semibold ${
                 activeTab === tab
-                  ? 'bg-blue-600/40 text-white font-semibold shadow-inner'
+                  ? 'bg-white/20 text-white shadow-sm border border-white/20'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -192,22 +194,22 @@ export default function SummaryMetricsCard({
           {hourlyData.map((item, idx) => (
             <div
               key={idx}
-              className="bg-[#12233c]/70 border border-white/10 rounded-xl p-3 flex flex-col items-center justify-between gap-1.5 hover:border-blue-400/40 transition"
+              className="apple-glass-capsule rounded-2xl p-3.5 flex flex-col items-center justify-between gap-1.5 hover:border-sky-400/50 hover:bg-white/[0.1] transition-all group"
             >
-              <span className="text-xs font-semibold text-slate-300">{item.time}</span>
-              <div className="my-1">
-                <WeatherIcon type={item.icon} size="w-6 h-6" />
+              <span className="text-xs font-semibold text-slate-300 group-hover:text-white">{item.time}</span>
+              <div className="my-1.5 group-hover:scale-110 transition-transform">
+                <WeatherIcon type={item.icon} size="w-7 h-7" />
               </div>
-              <span className="text-base font-bold text-white">
+              <span className="text-base font-bold text-white tracking-tight">
                 {formatTemp(item.temp)}{tempSymbol}
               </span>
               <div className="w-full bg-white/10 rounded-full h-1.5 mt-1 overflow-hidden">
                 <div
-                  className="bg-blue-400 h-full rounded-full"
+                  className="bg-gradient-to-r from-sky-400 to-blue-500 h-full rounded-full"
                   style={{ width: `${item.rain}%` }}
                 />
               </div>
-              <span className="text-[10px] text-sky-300">{item.rain}% Rain</span>
+              <span className="text-[10px] font-semibold text-sky-300">{item.rain}% Rain</span>
             </div>
           ))}
         </div>
@@ -216,7 +218,7 @@ export default function SummaryMetricsCard({
       {/* TAB 3: MORE DETAILS / METRICS */}
       {activeTab === 'More Details' && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 py-2 z-10">
-          <div className="bg-[#12233c]/70 border border-white/10 rounded-xl p-3.5 flex flex-col justify-between">
+          <div className="apple-glass-capsule rounded-2xl p-4 flex flex-col justify-between hover:border-sky-400/40 transition">
             <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold">
               <Sunrise className="w-4 h-4 text-amber-400" />
               <span>Sunrise & Sunset</span>
@@ -233,57 +235,57 @@ export default function SummaryMetricsCard({
             </div>
           </div>
 
-          <div className="bg-[#12233c]/70 border border-white/10 rounded-xl p-3.5 flex flex-col justify-between">
+          <div className="apple-glass-capsule rounded-2xl p-4 flex flex-col justify-between hover:border-sky-400/40 transition">
             <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold">
               <Eye className="w-4 h-4 text-sky-400" />
               <span>Visibility</span>
             </div>
             <div className="mt-2">
-              <span className="text-xl font-bold text-white">{weather.visibility} km</span>
+              <span className="text-xl font-bold text-white tracking-tight">{weather.visibility} km</span>
               <p className="text-[10px] text-slate-400 mt-0.5">Clear visibility across city</p>
             </div>
           </div>
 
-          <div className="bg-[#12233c]/70 border border-white/10 rounded-xl p-3.5 flex flex-col justify-between">
+          <div className="apple-glass-capsule rounded-2xl p-4 flex flex-col justify-between hover:border-sky-400/40 transition">
             <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold">
               <Sliders className="w-4 h-4 text-emerald-400" />
               <span>Air Pressure</span>
             </div>
             <div className="mt-2">
-              <span className="text-xl font-bold text-white">{weather.pressure} hPa</span>
+              <span className="text-xl font-bold text-white tracking-tight">{weather.pressure} hPa</span>
               <p className="text-[10px] text-slate-400 mt-0.5">Normal atmospheric levels</p>
             </div>
           </div>
 
-          <div className="bg-[#12233c]/70 border border-white/10 rounded-xl p-3.5 flex flex-col justify-between">
+          <div className="apple-glass-capsule rounded-2xl p-4 flex flex-col justify-between hover:border-sky-400/40 transition">
             <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold">
               <Droplets className="w-4 h-4 text-cyan-400" />
               <span>Dew Point</span>
             </div>
             <div className="mt-2">
-              <span className="text-xl font-bold text-white">{formatTemp(weather.dewPoint)}{tempSymbol}</span>
+              <span className="text-xl font-bold text-white tracking-tight">{formatTemp(weather.dewPoint)}{tempSymbol}</span>
               <p className="text-[10px] text-slate-400 mt-0.5">High condensation expected</p>
             </div>
           </div>
 
-          <div className="bg-[#12233c]/70 border border-white/10 rounded-xl p-3.5 flex flex-col justify-between">
+          <div className="apple-glass-capsule rounded-2xl p-4 flex flex-col justify-between hover:border-sky-400/40 transition">
             <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold">
               <Wind className="w-4 h-4 text-blue-400" />
               <span>Wind & Gusts</span>
             </div>
             <div className="mt-2">
-              <span className="text-xl font-bold text-white">{formatWind(weather.windSpeed)}</span>
+              <span className="text-xl font-bold text-white tracking-tight">{formatWind(weather.windSpeed)}</span>
               <p className="text-[10px] text-slate-400 mt-0.5">Direction: West-Northwest</p>
             </div>
           </div>
 
-          <div className="bg-[#12233c]/70 border border-white/10 rounded-xl p-3.5 flex flex-col justify-between">
+          <div className="apple-glass-capsule rounded-2xl p-4 flex flex-col justify-between hover:border-sky-400/40 transition">
             <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold">
               <Sun className="w-4 h-4 text-yellow-400" />
               <span>UV Level</span>
             </div>
             <div className="mt-2">
-              <span className="text-xl font-bold text-white">{weather.uv} / 10</span>
+              <span className="text-xl font-bold text-white tracking-tight">{weather.uv} / 10</span>
               <p className="text-[10px] text-emerald-400 mt-0.5">Moderate exposure risk</p>
             </div>
           </div>

@@ -104,8 +104,8 @@ export default function MiniMapCard({
   }, [mapLayer]);
 
   return (
-    <div className="lg:col-span-5 bg-[#182c4b]/80 border border-white/10 rounded-2xl p-2.5 shadow-lg relative min-h-[220px] flex flex-col overflow-hidden">
-      <div className="w-full h-full min-h-[200px] rounded-xl overflow-hidden relative">
+    <div className="lg:col-span-5 apple-glass-card rounded-[28px] p-3 shadow-2xl relative min-h-[220px] flex flex-col overflow-hidden select-none">
+      <div className="w-full h-full min-h-[200px] rounded-2xl overflow-hidden relative border border-white/10 shadow-inner">
         <div
           ref={mapContainerRef}
           className={`w-full h-full min-h-[200px] transition-all ${mapLayer === 'dark' ? 'pitch-dark-map' : ''}`}

@@ -11,6 +11,9 @@ import {
   ChevronRight,
   LogOut,
   Loader2,
+  Sparkles,
+  Edit2,
+  User,
 } from 'lucide-react';
 
 export default function Header({
@@ -41,6 +44,9 @@ export default function Header({
   clearAllNotifications,
   showProfileModal,
   setShowProfileModal,
+  profileName = 'Amit Lal',
+  profileAvatar = 'https://api.dicebear.com/7.x/bottts/svg?seed=AetherSky',
+  onOpenEditProfile,
   favoritesCount,
   setActiveNav,
   onOpenLogout,
@@ -64,7 +70,7 @@ export default function Header({
             }}
             onKeyDown={handleSearchKeyDown}
             placeholder="Search any city worldwide (e.g. Paris, Kolkata, Austin)..."
-            className="w-full pl-11 pr-14 py-2.5 bg-[#172b49]/70 border border-white/10 rounded-xl text-sm placeholder-slate-400 text-white focus:outline-none focus:border-blue-400/60 focus:bg-[#1a3254]/90 transition shadow-inner"
+            className="w-full pl-11 pr-14 py-2.5 bg-white/[0.08] hover:bg-white/[0.11] focus:bg-white/[0.14] border border-white/20 focus:border-sky-400/70 rounded-2xl text-sm placeholder-slate-400 text-white focus:outline-none backdrop-blur-xl transition shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)]"
           />
           <Search className="absolute left-3.5 top-3 text-slate-400 w-4 h-4" />
 
@@ -89,7 +95,7 @@ export default function Header({
 
         {/* Suggestions Dropdown */}
         {searchFocused && (
-          <div className="absolute left-0 right-0 mt-2 bg-[#0f213a]/95 border border-white/15 rounded-2xl shadow-2xl backdrop-blur-2xl z-[1001] overflow-hidden text-xs divide-y divide-white/5 animate-fade-in">
+          <div className="absolute left-0 right-0 mt-2 bg-[#0c1a30]/95 border border-white/20 rounded-3xl shadow-2xl backdrop-blur-2xl z-[1001] overflow-hidden text-xs divide-y divide-white/5 animate-fade-in">
             {cityInput.trim().length > 0 ? (
               // Matching Suggestions when typing
               <div className="p-2">
@@ -107,7 +113,7 @@ export default function Header({
                     <p className="text-xs text-slate-300">Searching global cities via OpenWeather API...</p>
                   </div>
                 ) : filteredSuggestions.length > 0 ? (
-                  <div className="flex flex-col gap-1 max-h-64 overflow-y-auto pr-1">
+                  <div className="flex flex-col gap-1 max-h-64 overflow-y-auto no-scrollbar pr-1">
                     {filteredSuggestions.map((city, idx) => {
                       const isHighlighted = searchSuggestionIndex === idx;
                       return (
@@ -273,7 +279,7 @@ export default function Header({
             triggerToast(`Switched to °${nextUnit}`);
           }}
           title="Toggle Temperature Unit"
-          className="px-3 py-2 bg-[#172b49]/70 hover:bg-[#203a62] border border-white/10 rounded-xl text-xs font-bold text-sky-200 transition flex items-center gap-1 shadow-md"
+          className="px-3.5 py-2 bg-white/[0.08] hover:bg-white/[0.14] border border-white/20 rounded-2xl text-xs font-bold text-sky-200 transition flex items-center gap-1.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)]"
         >
           <span>°{unit}</span>
           <span className="text-[10px] text-slate-400 font-normal">switch</span>
@@ -284,7 +290,7 @@ export default function Header({
           onClick={handleLocateMe}
           disabled={locating}
           title="Detect GPS Current Location"
-          className={`p-2.5 bg-[#172b49]/70 hover:bg-[#203a62] border border-white/10 rounded-xl text-slate-300 hover:text-white transition ${
+          className={`p-2.5 bg-white/[0.08] hover:bg-white/[0.14] border border-white/20 rounded-2xl text-slate-300 hover:text-white transition shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)] ${
             locating ? 'animate-spin text-sky-400' : ''
           }`}
         >
@@ -296,11 +302,11 @@ export default function Header({
           <button
             onClick={() => setShowNotifications(!showNotifications)}
             title="Weather Alerts"
-            className="relative p-2.5 bg-[#172b49]/70 hover:bg-[#203a62] border border-white/10 rounded-xl text-slate-300 hover:text-white transition"
+            className="relative p-2.5 bg-white/[0.08] hover:bg-white/[0.14] border border-white/20 rounded-2xl text-slate-300 hover:text-white transition shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)]"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-[#12233c]">
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-[#0c1a30]">
                 {unreadCount}
               </span>
             )}
@@ -308,7 +314,7 @@ export default function Header({
 
           {/* Notifications Dropdown Panel */}
           {showNotifications && (
-            <div className="absolute right-0 mt-3 w-80 sm:w-88 bg-[#101e33] border border-white/15 rounded-2xl p-4 shadow-2xl backdrop-blur-2xl z-50">
+            <div className="absolute right-0 mt-3 w-80 sm:w-88 bg-[#0c1a30]/95 border border-white/20 rounded-3xl p-4 shadow-2xl backdrop-blur-2xl z-50">
               <div className="flex items-center justify-between pb-2.5 border-b border-white/10 mb-3">
                 <div className="flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-sky-400" />
@@ -325,7 +331,7 @@ export default function Header({
               {notifications.length === 0 ? (
                 <p className="text-xs text-slate-400 py-6 text-center">No active alerts right now.</p>
               ) : (
-                <div className="flex flex-col gap-2.5 max-h-60 overflow-y-auto pr-1">
+                <div className="flex flex-col gap-2.5 max-h-60 overflow-y-auto no-scrollbar pr-1">
                   {notifications.map((n) => (
                     <div
                       key={n.id}
@@ -363,47 +369,65 @@ export default function Header({
           )}
         </div>
 
-        {/* User Avatar Button */}
+        {/* User Cool Avatar Button */}
         <div className="relative">
           <button
             onClick={() => setShowProfileModal(!showProfileModal)}
-            className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/20 shadow-md hover:ring-2 hover:ring-blue-400/50 transition cursor-pointer"
-            title="Profile & Preferences"
+            className="w-10 h-10 rounded-2xl overflow-hidden border-2 border-sky-400/40 shadow-lg shadow-sky-500/20 hover:border-sky-300 hover:ring-2 hover:ring-sky-400/40 transition-all cursor-pointer bg-[#12233c] flex items-center justify-center group"
+            title={`${profileName} - Profile & Preferences`}
           >
             <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-              alt="User Profile"
-              className="w-full h-full object-cover"
+              src={profileAvatar}
+              alt={profileName}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
             />
           </button>
 
           {/* Profile Popup */}
           {showProfileModal && (
-            <div className="absolute right-0 mt-3 w-64 bg-[#101e33] border border-white/15 rounded-2xl p-4 shadow-2xl backdrop-blur-2xl z-50">
+            <div className="absolute right-0 mt-3 w-72 bg-[#101e33] border border-white/15 rounded-3xl p-4 shadow-2xl backdrop-blur-2xl z-50 animate-scale-up">
               <div className="flex items-center gap-3 pb-3 border-b border-white/10">
-                <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20">
-                  <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                  />
+                <div className="relative">
+                  <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-sky-400/60 shadow-md bg-[#162744]">
+                    <img
+                      src={profileAvatar}
+                      alt={profileName}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[#101e33]" title="Online" />
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white">Amit Lal</h4>
-                  <p className="text-[11px] text-slate-400">Personal Station</p>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-bold text-white truncate">{profileName}</h4>
+                  <p className="text-[11px] text-sky-300 flex items-center gap-1 font-medium">
+                    <Sparkles className="w-3 h-3" />
+                    <span>Station Commander</span>
+                  </p>
                 </div>
               </div>
 
-              <div className="py-2.5 flex flex-col gap-1.5 text-xs">
+              {/* Edit Profile Action */}
+              <button
+                onClick={() => {
+                  setShowProfileModal(false);
+                  if (onOpenEditProfile) onOpenEditProfile();
+                }}
+                className="w-full mt-2.5 mb-1 py-2 px-3 rounded-xl bg-gradient-to-r from-blue-600/30 to-sky-600/30 hover:from-blue-600/50 hover:to-sky-600/50 border border-sky-400/30 text-sky-200 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-sm"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+                <span>Change Name & Avatar</span>
+              </button>
+
+              <div className="py-2 flex flex-col gap-1 text-xs">
                 <button
                   onClick={() => {
                     setActiveNav('locations');
                     setShowProfileModal(false);
                   }}
-                  className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white/5 text-slate-200"
+                  className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-white/5 text-slate-200 transition"
                 >
                   <span>Saved Locations</span>
-                  <span className="text-[10px] bg-blue-500/30 px-2 py-0.5 rounded-full text-blue-200">
+                  <span className="text-[10px] bg-blue-500/30 px-2 py-0.5 rounded-full text-blue-200 font-bold">
                     {favoritesCount}
                   </span>
                 </button>
@@ -412,9 +436,9 @@ export default function Header({
                     setActiveNav('settings');
                     setShowProfileModal(false);
                   }}
-                  className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white/5 text-slate-200"
+                  className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-white/5 text-slate-200 transition"
                 >
-                  <span>Preferences</span>
+                  <span>Preferences & Settings</span>
                   <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                 </button>
               </div>
@@ -424,7 +448,7 @@ export default function Header({
                   setShowProfileModal(false);
                   onOpenLogout();
                 }}
-                className="w-full mt-2 pt-2 border-t border-white/10 text-left text-xs text-red-300 hover:text-red-200 p-2 flex items-center gap-2"
+                className="w-full mt-1 pt-2 border-t border-white/10 text-left text-xs text-red-300 hover:text-red-200 p-2 flex items-center gap-2 rounded-xl hover:bg-red-500/10 transition"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Sign Out</span>

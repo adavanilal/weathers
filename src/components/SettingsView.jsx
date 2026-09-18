@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, User, Edit2, Sparkles } from 'lucide-react';
 
 export default function SettingsView({
   unit,
@@ -11,15 +11,52 @@ export default function SettingsView({
   mapLayer,
   setMapLayer,
   onResetDefaults,
+  profileName = 'Amit Lal',
+  profileAvatar = 'https://api.dicebear.com/7.x/bottts/svg?seed=AetherSky',
+  onOpenEditProfile,
 }) {
   return (
     <div className="flex flex-col gap-5 flex-1 max-w-2xl">
       <div>
         <h2 className="text-lg font-bold text-white flex items-center gap-2">
           <Settings className="w-5 h-5 text-sky-400" />
-          Preferences & Units
+          Preferences & Profile
         </h2>
-        <p className="text-xs text-slate-400">Customize how temperatures, wind, and time formats are displayed</p>
+        <p className="text-xs text-slate-400">Customize your weather station identity, temperatures, wind, and time formats</p>
+      </div>
+
+      {/* Profile & Avatar Setting Card */}
+      <div className="bg-[#182c4b]/80 border border-white/10 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 backdrop-blur-md shadow-lg">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-sky-400/50 shadow-lg shadow-sky-500/20 bg-[#12233c] flex items-center justify-center">
+              <img
+                src={profileAvatar}
+                alt={profileName}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-[#101e33]" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-bold text-white">{profileName}</h3>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/20 font-semibold flex items-center gap-1">
+                <Sparkles className="w-2.5 h-2.5" />
+                Commander
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">Active call sign & avatar</p>
+          </div>
+        </div>
+
+        <button
+          onClick={onOpenEditProfile}
+          className="self-start sm:self-auto px-4 py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-500 hover:to-sky-400 text-white rounded-xl text-xs font-semibold shadow-md shadow-blue-500/20 transition flex items-center gap-2"
+        >
+          <Edit2 className="w-3.5 h-3.5" />
+          <span>Change Name & Avatar</span>
+        </button>
       </div>
 
       <div className="bg-[#182c4b]/80 border border-white/10 rounded-2xl p-5 flex flex-col gap-4">
