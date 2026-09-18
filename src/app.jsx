@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import L from 'leaflet';
-
 import { API_KEY, DEFAULT_POPULAR_CITIES, mapConditionToIconType } from './constants/cities';
 
 import NavigationRail from './components/NavigationRail';
@@ -105,33 +103,19 @@ export default function App() {
   });
 
   const [forecastList, setForecastList] = useState([
-    { date: '25 Jul, Thu', day: 'Thu', min: 22, max: 24, condition: 'Rain', icon: 'rain' },
-    { date: '26 Jul, Fri', day: 'Fri', min: 22, max: 24, condition: 'Sun Cloud', icon: 'sun-cloud' },
-    { date: '27 Jul, Sat', day: 'Sat', min: 22, max: 24, condition: 'Cloudy', icon: 'cloud' },
-    { date: '28 Jul, Sun', day: 'Sun', min: 22, max: 24, condition: 'Heavy Rain', icon: 'heavy-rain' },
-    { date: '29 Jul, Mon', day: 'Mon', min: 22, max: 24, condition: 'Light Rain', icon: 'rain' },
-    { date: '30 Jul, Tue', day: 'Tue', min: 22, max: 24, condition: 'Thunder', icon: 'thunder' },
-    { date: '31 Jul, Wed', day: 'Wed', min: 21, max: 25, condition: 'Sun', icon: 'sun' },
-    { date: '01 Aug, Thu', day: 'Thu', min: 22, max: 26, condition: 'Partly Cloudy', icon: 'sun-cloud' },
-    { date: '02 Aug, Fri', day: 'Fri', min: 20, max: 24, condition: 'Drizzle', icon: 'drizzle' },
-    { date: '03 Aug, Sat', day: 'Sat', min: 21, max: 25, condition: 'Clear', icon: 'sun' },
+    { date: 'Today', day: 'Today', min: 22, max: 28, condition: 'Clear', icon: 'sun' },
+    { date: 'Tomorrow', day: 'Tomorrow', min: 23, max: 29, condition: 'Sun Cloud', icon: 'sun-cloud' },
+    { date: 'Upcoming', day: 'Day 3', min: 22, max: 28, condition: 'Cloudy', icon: 'cloud' },
+    { date: 'Upcoming', day: 'Day 4', min: 21, max: 27, condition: 'Rain', icon: 'rain' },
   ]);
 
   const [hourlyData, setHourlyData] = useState([
-    { time: 'Now', temp: 22, rain: 78, isNextDay: false, icon: 'heavy-rain', wind: 6, humidity: 92 },
-    { time: '7 PM', temp: 20, rain: 79, isNextDay: false, icon: 'rain', wind: 7, humidity: 90 },
-    { time: '9 PM', temp: 22, rain: 76, isNextDay: false, icon: 'rain', wind: 5, humidity: 88 },
-    { time: '11 PM', temp: 19, rain: 81, isNextDay: false, icon: 'thunder', wind: 8, humidity: 94 },
-    { time: '1 AM', temp: 21, rain: 76, isNextDay: true, icon: 'rain', wind: 6, humidity: 95 },
-    { time: '3 AM', temp: 22, rain: 78, isNextDay: true, icon: 'rain', wind: 5, humidity: 95 },
-    { time: '5 AM', temp: 23, rain: 68, isNextDay: true, icon: 'drizzle', wind: 4, humidity: 91 },
-    { time: '7 AM', temp: 24, rain: 61, isNextDay: true, icon: 'sun-cloud', wind: 5, humidity: 82 },
-    { time: '9 AM', temp: 25, rain: 69, isNextDay: true, icon: 'sun-cloud', wind: 7, humidity: 76 },
-    { time: '11 AM', temp: 23, rain: 70, isNextDay: true, icon: 'heavy-rain', wind: 9, humidity: 85 },
+    { time: 'Now', temp: 27, rain: 20, isNextDay: false, icon: 'sun', wind: 6, humidity: 65 },
+    { time: '+2h', temp: 28, rain: 25, isNextDay: false, icon: 'sun-cloud', wind: 7, humidity: 62 },
+    { time: '+4h', temp: 29, rain: 20, isNextDay: false, icon: 'sun-cloud', wind: 8, humidity: 58 },
+    { time: '+6h', temp: 27, rain: 30, isNextDay: false, icon: 'cloud', wind: 6, humidity: 68 },
+    { time: '+8h', temp: 25, rain: 15, isNextDay: true, icon: 'sun', wind: 5, humidity: 72 },
   ]);
-
-  const [loading, setLoading] = useState(false);
-
 
   // Show quick toast notification
   const triggerToast = (msg) => {
@@ -175,7 +159,6 @@ export default function App() {
   // Fetch weather and air quality data for city from OpenWeatherMap API
   const fetchCityWeather = async (cityName, lat = null, lon = null) => {
     if (!cityName && (lat == null || lon == null)) return;
-    setLoading(true);
 
     try {
       // 1. Fetch live current weather by coordinates or city name
@@ -352,8 +335,6 @@ export default function App() {
     } catch (err) {
       console.warn('Weather fetch error:', err);
       triggerToast('Unable to connect to OpenWeather service');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -712,16 +693,11 @@ export default function App() {
             showProfileModal={showProfileModal}
             setShowProfileModal={setShowProfileModal}
             profileName={profileName}
-            setProfileName={setProfileName}
             profileAvatar={profileAvatar}
-            setProfileAvatar={setProfileAvatar}
             onOpenEditProfile={() => setShowProfileEditModal(true)}
             favoritesCount={favorites.length}
             setActiveNav={setActiveNav}
             onOpenLogout={() => setShowLogoutModal(true)}
-            formatTemp={formatTemp}
-            tempSymbol={tempSymbol}
-            triggerToast={triggerToast}
           />
 
           {/* 1. Dashboard View */}
@@ -733,7 +709,6 @@ export default function App() {
                   isCityFavorite={isCityFavorite}
                   toggleFavoriteCurrentCity={toggleFavoriteCurrentCity}
                   fetchCityWeather={fetchCityWeather}
-                  loading={loading}
                   formatTemp={formatTemp}
                   tempSymbol={tempSymbol}
                   setUnit={setUnit}
@@ -782,8 +757,6 @@ export default function App() {
                   hoveredHour={hoveredHour}
                   setHoveredHour={setHoveredHour}
                   formatTemp={formatTemp}
-                  tempSymbol={tempSymbol}
-                  formatWind={formatWind}
                 />
               </div>
             </>
@@ -812,7 +785,6 @@ export default function App() {
               radarSpeed={radarSpeed}
               setRadarSpeed={setRadarSpeed}
               radarTimelineLabels={radarTimelineLabels}
-              weather={weather}
             />
           )}
 

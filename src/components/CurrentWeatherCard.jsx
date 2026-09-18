@@ -7,17 +7,13 @@ import {
   Wind,
   Sun,
   Sparkles,
-  ArrowUpRight,
-  TrendingUp,
 } from 'lucide-react';
-import WeatherIcon from './WeatherIcon';
 
 export default function CurrentWeatherCard({
   weather,
   isCityFavorite,
   toggleFavoriteCurrentCity,
   fetchCityWeather,
-  loading,
   formatTemp,
   tempSymbol,
   setUnit,

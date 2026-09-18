@@ -13,7 +13,6 @@ export default function DopplerRadar({
   radarSpeed,
   setRadarSpeed,
   radarTimelineLabels,
-  weather,
 }) {
   return (
     <div className="flex flex-col gap-4 flex-1">

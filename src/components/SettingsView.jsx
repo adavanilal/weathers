@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, User, Edit2, Sparkles } from 'lucide-react';
+import { Settings, Edit2, Sparkles } from 'lucide-react';
 
 export default function SettingsView({
   unit,

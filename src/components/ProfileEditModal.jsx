@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Check, Sparkles, X, Camera, RefreshCw } from 'lucide-react';
+import { User, Check, Sparkles, X, Camera } from 'lucide-react';
 import { COOL_AVATARS } from '../constants/avatars';
 
 export default function ProfileEditModal({

@@ -5,8 +5,6 @@ import {
   Eye,
   Sliders,
   Droplets,
-  Wind,
-  Sun,
 } from 'lucide-react';
 
 export default function SummaryMetricsCard({
@@ -19,8 +17,6 @@ export default function SummaryMetricsCard({
   hoveredHour,
   setHoveredHour,
   formatTemp,
-  tempSymbol,
-  formatWind,
 }) {
   // SVG Wave calculations
   const chartWidth = 640;

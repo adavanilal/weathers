@@ -13,7 +13,6 @@ import {
   Loader2,
   Sparkles,
   Edit2,
-  User,
 } from 'lucide-react';
 
 export default function Header({
@@ -50,9 +49,6 @@ export default function Header({
   favoritesCount,
   setActiveNav,
   onOpenLogout,
-  formatTemp,
-  tempSymbol,
-  triggerToast,
 }) {
   return (
     <header className="flex flex-col sm:flex-row items-center justify-between gap-4 relative z-[999]">
