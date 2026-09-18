@@ -155,11 +155,11 @@ export default function App() {
     return `${Math.round(kmh)} km/h`;
   };
 
-  // Map Tile URLs
+  // Map Tile URLs (Completely free, no watermarks, no API keys needed)
   const getTileUrl = (layerType) => {
     switch (layerType) {
       case 'dark':
-        return 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+        return 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
       case 'satellite':
         return 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
       case 'streets':
@@ -180,7 +180,6 @@ export default function App() {
 
       const tileLayer = L.tileLayer(getTileUrl(mapLayer), {
         maxZoom: 19,
-        subdomains: 'abcd',
       }).addTo(map);
 
       const customIcon = L.divIcon({
@@ -212,9 +211,19 @@ export default function App() {
       mapInstanceRef.current.removeLayer(tileLayerRef.current);
       const newLayer = L.tileLayer(getTileUrl(mapLayer), {
         maxZoom: 19,
-        subdomains: 'abcd',
       }).addTo(mapInstanceRef.current);
       tileLayerRef.current = newLayer;
+    }
+  }, [mapLayer]);
+
+  // Update Full Map Tile Layer on style change
+  useEffect(() => {
+    if (fullMapInstanceRef.current && fullTileLayerRef.current) {
+      fullMapInstanceRef.current.removeLayer(fullTileLayerRef.current);
+      const newLayer = L.tileLayer(getTileUrl(mapLayer), {
+        maxZoom: 19,
+      }).addTo(fullMapInstanceRef.current);
+      fullTileLayerRef.current = newLayer;
     }
   }, [mapLayer]);
 
